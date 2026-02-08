@@ -1,0 +1,12 @@
+{
+  "name": "proj1_securechat_server",
+  "version": "0.1.0",
+  "main": "source/server.js",
+  "type": "commonjs",
+  "scripts": {
+    "start": "node source/server.js"
+  },
+  "dependencies": {
+    "ws": "^8.18.0"
+  }
+}
