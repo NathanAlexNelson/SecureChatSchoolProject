@@ -1,6 +1,70 @@
 const url = require("url");
 const { validate_sesh } = require("./sessions");
 
+// ===== Rate limiting (per-IP sliding window) =====
+const rateMap = new Map();
+const WINDOW_MS = 10_000; // 10 seconds
+const MAX_MSGS = 25;
+
+function isRateLimited(ip) {
+    const now = Date.now();
+    let entry = rateMap.get(ip);
+
+    if (!entry || now - entry.start > WINDOW_MS) {
+        entry = { start: now, count: 0 };
+        rateMap.set(ip, entry);
+    }
+
+    entry.count += 1;
+    return entry.count > MAX_MSGS;
+}
+
+// cleanup so map doesn't grow forever
+setInterval(() => {
+    const now = Date.now();
+    for (const [ip, entry] of rateMap.entries()) {
+        if (now - entry.start > WINDOW_MS * 6) rateMap.delete(ip);
+    }
+}, WINDOW_MS * 6);
+
+// ===== Heartbeat helper =====
+function heartbeat() {
+    this.isAlive = true;
+}
+
+const client_user = new Map(); // username --> ws
+const user_socket = new Map(); // ws --> username
+
+function send_json(ws, obj) {
+    if (!ws || ws.readyState !== ws.OPEN) return;
+    ws.send(JSON.stringify(obj));
+}
+
+// notification system
+function broadcast(obj, except_ws = null) {
+    const message = JSON.stringify(obj);
+    for (const ws of client_user.values()) {
+        if (ws !== except_ws && ws.readyState === ws.OPEN) ws.send(message);
+    }
+}
+
+// handle closed sockets
+function clean(ws) {
+    const username = user_socket.get(ws);
+    if (!username) return;
+    
+    const current = client_user.get(username);
+    if (current === ws) client_user.delete(username);
+    user_socket.delete(ws);
+
+    // disconnect notification
+    broadcast({ type: "system",
+                event: "leave",
+                user: username,
+                ts: Date.now() },
+                ws);
+}
+
 function websocketcon(ws, req, wss) {
     const parsed = url.parse(req.url, true);
     const token = parsed.query.token;
@@ -11,26 +75,130 @@ function websocketcon(ws, req, wss) {
         ws.close(1008, "unauthorized"); // 1008 = policy violation
         return;
     }
+
+    let ip =
+        req.socket && req.socket.remoteAddress
+            ? req.socket.remoteAddress
+            : "unknown";
+
+    // normalize IPv6-mapped IPv4 (optional but helpful)
+    if (ip.startsWith("::ffff:")) ip = ip.slice(7);
+
+    // enable heartbeat for this socket (server.js pings; this marks alive on pong)
+    ws.isAlive = true;
+    ws.on("pong", heartbeat);
+
     const username = sesh.username; // tie user to socket
 
-    // confirmation
-    ws.send(JSON.stringify({ type: "system",
-                             event: "connected",
-                             user: username,
-                             ts: Date.now() })) // for logging
-    // client message
-    ws.on("message", (raw) => {
-        const text = Buffer.isBuffer(raw) ? raw.toString("utf8") : String(raw); //normalize the input for ws
+    // allows reconnects 
+    const old = client_user.get(username);
+    if (old && old !== ws) {
+            send_json(old, { type: "system",
+                             event: "kicked",
+                             reason: "reconnected",
+                             ts: Date.now() 
+            });
 
-        ws.send(JSON.stringify({ type: "echo",
-                                 from: username,
-                                 text,
-                                 ts: Date.now() }))
+            old.close(4000, "reconnected");
+    } 
+
+    client_user.set(username, ws);
+    user_socket.set(ws, username);
+
+    send_json(ws, { type: "system", 
+                    event: "connected",
+                    user: username,
+                    online: Array.from(client_user.keys()),
+                    ts: Date.now(),
     });
 
-    ws.on("close", () => {
-        // cleanup user connection tracking l8r
-    })
+    // join notification
+    broadcast({ type: "system",
+                event: "join",
+                user: username,
+                ts: Date.now() },
+                ws);
+
+    // client message
+    ws.on("message", (raw) => {
+        // rate limiting check
+        if (isRateLimited(ip)) {
+            ws.close(1008, "Rate limit exceeded");
+            return;
+        }
+
+        let message;
+        try {
+            const text = Buffer.isBuffer(raw)
+            ? raw.toString("utf8")
+            : String(raw); // normalize the input for ws
+
+            message = JSON.parse(text);
+        } catch {
+            send_json(ws, { type: "error", 
+                            code: "BAD_JSON",
+                            message: "Invalid JSON",
+                            ts: Date.now()
+            });
+            return;
+        }
+
+        if (!message || typeof message.type !== "string") {
+            send_json(ws, { type: "error", 
+                            code: "BAD_FORMAT",
+                            message: "Missing message type",
+                            ts: Date.now()
+            });
+            return;
+        }
+
+        // DM
+        if (message.type === "chat") {
+            const to = String(message.to || "").trim();
+            const text = String(message.text || "");
+
+            if (!to || !text) {
+                send_json(ws, { type: "error", 
+                                code: "CHAT_INVALID",
+                                message: "chat needs {to, text}",
+                                ts: Date.now()
+                });
+                return;
+            }
+
+            const to_socket = client_user.get(to);
+            if (!to_socket) {
+                send_json(ws, { type: "error", 
+                                code: "USER_OFFLINE",
+                                message: `user is offline: ${to}`,
+                                ts: Date.now()
+                });
+                return;
+            }
+
+            send_json(to_socket, { type: "chat", 
+                                   from: username,
+                                   text,
+                                   ts: Date.now()
+            });
+            
+            send_json(ws, { type: "chat_ack", 
+                            to,
+                            ts: Date.now()
+            });
+            return;
+        }
+        
+        // error handling
+        send_json(JSON.stringify({
+            type: "error",
+            code: "UNKNOWN_TYPE",
+            message: `unknown type: ${message.type}`,
+            ts: Date.now()
+        }));
+    });
+    ws.on("close", () => clean(ws));
+    ws.on("error", () => clean(ws));
 }
 
 module.exports = { websocketcon };
