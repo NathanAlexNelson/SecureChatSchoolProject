@@ -32,6 +32,39 @@ function heartbeat() {
     this.isAlive = true;
 }
 
+const client_user = new Map(); // username --> ws
+const user_socket = new Map(); // ws --> username
+
+function send_json(ws, obj) {
+    if (!ws || ws.readyState !== ws.OPEN) return;
+    ws.send(JSON.stringify(obj));
+}
+
+// notification system
+function broadcast(obj, except_ws = null) {
+    const message = JSON.stringify(obj);
+    for (const ws of client_user.values()) {
+        if (ws !== except_ws && ws.readyState === ws.OPEN) ws.send(message);
+    }
+}
+
+// handle closed sockets
+function clean(ws) {
+    const username = user_socket.get(ws);
+    if (!username) return;
+    
+    const current = client_user.get(username);
+    if (current === ws) client_user.delete(username);
+    user_socket.delete(ws);
+
+    // disconnect notification
+    broadcast({ type: "system",
+                event: "leave",
+                user: username,
+                ts: Date.now() },
+                ws);
+}
+
 function websocketcon(ws, req, wss) {
     const parsed = url.parse(req.url, true);
     const token = parsed.query.token;
@@ -57,13 +90,34 @@ function websocketcon(ws, req, wss) {
 
     const username = sesh.username; // tie user to socket
 
-    // confirmation
-    ws.send(JSON.stringify({
-        type: "system",
-        event: "connected",
-        user: username,
-        ts: Date.now()
-    })); // for logging
+    // allows reconnects 
+    const old = client_user.get(username);
+    if (old && old !== ws) {
+            send_json(old, { type: "system",
+                             event: "kicked",
+                             reason: "reconnected",
+                             ts: Date.now() 
+            });
+
+            old.close(4000, "reconnected");
+    } 
+
+    client_user.set(username, ws);
+    user_socket.set(ws, username);
+
+    send_json(ws, { type: "system", 
+                    event: "connected",
+                    user: username,
+                    online: Array.from(client_user.keys()),
+                    ts: Date.now(),
+    });
+
+    // join notification
+    broadcast({ type: "system",
+                event: "join",
+                user: username,
+                ts: Date.now() },
+                ws);
 
     // client message
     ws.on("message", (raw) => {
@@ -73,21 +127,78 @@ function websocketcon(ws, req, wss) {
             return;
         }
 
-        const text = Buffer.isBuffer(raw)
+        let message;
+        try {
+            const text = Buffer.isBuffer(raw)
             ? raw.toString("utf8")
             : String(raw); // normalize the input for ws
 
-        ws.send(JSON.stringify({
-            type: "echo",
-            from: username,
-            text,
+            message = JSON.parse(text);
+        } catch {
+            send_json(ws, { type: "error", 
+                            code: "BAD_JSON",
+                            message: "Invalid JSON",
+                            ts: Date.now()
+            });
+            return;
+        }
+
+        if (!message || typeof message.type !== "string") {
+            send_json(ws, { type: "error", 
+                            code: "BAD_FORMAT",
+                            message: "Missing message type",
+                            ts: Date.now()
+            });
+            return;
+        }
+
+        // DM
+        if (message.type === "chat") {
+            const to = String(message.to || "").trim();
+            const text = String(message.text || "");
+
+            if (!to || !text) {
+                send_json(ws, { type: "error", 
+                                code: "CHAT_INVALID",
+                                message: "chat needs {to, text}",
+                                ts: Date.now()
+                });
+                return;
+            }
+
+            const to_socket = client_user.get(to);
+            if (!to_socket) {
+                send_json(ws, { type: "error", 
+                                code: "USER_OFFLINE",
+                                message: `user is offline: ${to}`,
+                                ts: Date.now()
+                });
+                return;
+            }
+
+            send_json(to_socket, { type: "chat", 
+                                   from: username,
+                                   text,
+                                   ts: Date.now()
+            });
+            
+            send_json(ws, { type: "chat_ack", 
+                            to,
+                            ts: Date.now()
+            });
+            return;
+        }
+        
+        // error handling
+        send_json(JSON.stringify({
+            type: "error",
+            code: "UNKNOWN_TYPE",
+            message: `unknown type: ${message.type}`,
             ts: Date.now()
         }));
     });
-
-    ws.on("close", () => {
-        // cleanup user connection tracking l8r
-    });
+    ws.on("close", () => clean(ws));
+    ws.on("error", () => clean(ws));
 }
 
 module.exports = { websocketcon };
