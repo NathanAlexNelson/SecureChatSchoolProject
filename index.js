@@ -115,6 +115,15 @@ OutButt.onclick = function(){
     }
 }
 
+//displays messages to HTML
+socket.onmessage = function(event) {
+    const data = JSON.parse(event.data);
+    if(data.type === "chat"){
+        document.getElementById("head2").textContent = `${data.from}: ${data.text}`;
+    }
+    console.log("Received from server:", data);
+};
+
 
 //TOKEN = socket.send(JSON.stringify({`{"username":${usernameInp}, "password":${passwordInp}` | curl.exe -k -X POST `https://${ipInp}:8443/login` -H "Content-Type: application/json" --data-binary "@-"}));
 
