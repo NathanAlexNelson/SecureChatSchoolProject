@@ -8,6 +8,7 @@ let serverIP;
 
 let loggedIn = false;
 
+let socket;
 let TOKEN;
 
 let ipInp;
@@ -56,6 +57,16 @@ LogButt.onclick = function(){
         .then(res => res.json())
         .then(data => {
             console.log("Login response:", data);
+
+            //Token created here
+            TOKEN = data.token;
+            // Create WebSocket HERE
+            socket = new WebSocket(`wss://${ipInp}:8443?token=${TOKEN}`);
+
+            socket.onopen = function () {
+                console.log("WebSocket connected!");
+                document.getElementById("head2").textContent = `Connected as ${usernameInp}`;
+            };
         })
         .catch(err => {
             console.error("Login failed:", err);
@@ -97,21 +108,22 @@ function validateIP(inputCheck) {
     }
 }
 
-OutButt.onclick = function(){
+OutButt.onclick = function () {
     outInp = document.getElementById("myText3").value;
-    sendTo = document.getElementById("sendTo").value
-    if (loggedIn == true){
-        console.log(usernameInp, "sent to", sendTo + ":", outInp)
-        document.getElementById("myText3").value = "";
-        
-        socket.send(JSON.stringify({ 
-        type: "chat", 
-        to: sendTo, 
-        text: outInp
+    sendTo = document.getElementById("sendTo").value;
+
+    if (loggedIn && socket && socket.readyState === WebSocket.OPEN) {
+
+        socket.send(JSON.stringify({
+            type: "chat",
+            to: sendTo,
+            text: outInp
         }));
-    }
-    else {
-        console.log("Not Logged In!")
+
+        document.getElementById("myText3").value = "";
+
+    } else {
+        console.log("Not connected to WebSocket!");
     }
 }
 
