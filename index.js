@@ -8,7 +8,7 @@ let serverIP;
 
 let loggedIn = false;
 
-let socket;
+var socket;
 let TOKEN;
 
 let ipInp;
@@ -66,6 +66,26 @@ LogButt.onclick = function(){
             socket.onopen = function () {
                 console.log("WebSocket connected!");
                 document.getElementById("head2").textContent = `Connected as ${usernameInp}`;
+            };
+
+            //displays messages to HTML
+            socket.onmessage = function(event) {
+                const data = JSON.parse(event.data);
+
+                console.log("Received from server:", data);
+
+                if (data.type === "chat") {
+                    document.getElementById("head2").textContent =
+                        `${data.from}: ${data.text}`;
+                }
+            };
+
+            socket.onerror = function(e){
+                console.log("WebSocket error:", e);
+            };
+
+            socket.onclose = function(e){
+                console.log("WebSocket closed:", e.code, e.reason);
             };
         })
         .catch(err => {
@@ -126,39 +146,3 @@ OutButt.onclick = function () {
         console.log("Not connected to WebSocket!");
     }
 }
-
-//displays messages to HTML
-socket.onmessage = function(event) {
-    const data = JSON.parse(event.data);
-    if(data.type === "chat"){
-        document.getElementById("head2").textContent = `${data.from}: ${data.text}`;
-    }
-    console.log("Received from server:", data);
-};
-
-
-//TOKEN = socket.send(JSON.stringify({`{"username":${usernameInp}, "password":${passwordInp}` | curl.exe -k -X POST `https://${ipInp}:8443/login` -H "Content-Type: application/json" --data-binary "@-"}));
-
-/*
-let TOKEN;
-
-async function login() {
-  const response = await fetch("https://SERVER_IP:8443/login", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify({
-      username: "myUser",
-      password: "myPassword"
-    })
-  });
-
-  const data = await response.json();
-
-  TOKEN = data.token;   // store token in variable
-  console.log("Token:", TOKEN);
-}
-
-const socket = new WebSocket(`wss://SERVER_IP:8443?token=${TOKEN}`);
-*/
