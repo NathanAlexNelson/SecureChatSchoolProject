@@ -14,27 +14,6 @@ let TOKEN;
 let ipInp;
 let validIP = false;
 
-const made_users = [
-    { username: "tyler", password: "password1" },
-    { username: "nathan", password: "password2" },
-    { username: "ali", password: "password3" },
-];
-
-//This is the test function before adding websocket call
-/*LogButt.onclick = function(){
-    usernameInp = document.getElementById("myText").value;
-    passwordInp = document.getElementById("myText2").value;
-    ipInp = document.getElementById("ipInp").value;
-    validateFunc(usernameInp);
-    validateIP(ipInp)
-    if (loggedIn == true && validIP == true){
-        document.getElementById("head2").textContent = `Connected as ${usernameInp}`;
-        console.log(usernameInp, "has connected!");
-        document.getElementById("myText").value = "";
-    }
-
-}*/
-
 //This is the button that should call to websocket
 LogButt.onclick = function(){
     usernameInp = document.getElementById("myText").value.toLowerCase();
@@ -58,17 +37,19 @@ LogButt.onclick = function(){
         .then(data => {
             console.log("Login response:", data);
 
-            //Token created here
+            // Token created here
             TOKEN = data.token;
             // Create WebSocket HERE
             socket = new WebSocket(`wss://${ipInp}:8443?token=${TOKEN}`);
 
+
+            //All of this has to be in the same function as token and socket creation
             socket.onopen = function () {
                 console.log("WebSocket connected!");
                 document.getElementById("head2").textContent = `Connected as ${usernameInp}`;
             };
 
-            //displays messages to HTML
+            // Displays messages to HTML
             socket.onmessage = function(event) {
                 const data = JSON.parse(event.data);
 
@@ -94,18 +75,13 @@ LogButt.onclick = function(){
     }
 }
 
-// Function to validate alphanumeric input
+// Function to validate alphanumeric input does not check username that is done at server launch in backend
 function validateFunc(inputCheck) {
     let val = inputCheck.trim(); 
     let RegEx = /^[a-z0-9.]+$/i; 
     let Valid = RegEx.test(val);
-
-    const user = made_users.find(u => 
-        u.username === usernameInp && 
-        u.password === passwordInp
-    );
     
-    if (Valid && user) {
+    if (Valid) {
         loggedIn = true;
     }
     else {
@@ -114,7 +90,7 @@ function validateFunc(inputCheck) {
     }
 }
 
-//validates numbers and dots for IP
+// Validates numbers and dots for IP
 function validateIP(inputCheck) {
     let val = inputCheck.trim(); 
     let RegEx = /^[0-9.]+$/i; 
