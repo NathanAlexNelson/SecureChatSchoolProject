@@ -1,10 +1,11 @@
-const { handle_login } = require("./auth");
+const { handle_login, handle_reg } = require("./auth");
+const { list_users } = require("./users");
 
 // Basic CORS, just testing
 function Http(req, res) {
     res.setHeader("Access-Control-Allow-Origin", "*"); //anybody
-    res.setHeader("Access-Control-Allow-Headers", "Content-Type");
-    res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS"); //so far
+    res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
+    res.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS"); //so far
 
     // preflight
     if (req.method === "OPTIONS") {
@@ -21,6 +22,18 @@ function Http(req, res) {
     // login
     if (req.method === "POST" && req.url === "/login") {
         return handle_login(req, res);
+    }
+
+    // register
+    if (req.method === "POST" && req.url === "/register") {
+        return handle_reg(req, res);
+    }
+
+    // list (registered only)
+    if (req.method === "GET" && req.url === "/users") {
+        const users = list_users();
+        res.writeHead(200, { "Content-Type": "application/json" });
+        return res.end(JSON.stringify({ users }));
     }
 
     // error handling
