@@ -1,5 +1,6 @@
 const { verify_cred, reg_user } = require("./users");
 const { create_sesh } = require("./sessions");
+const { lockout_check, fail_record, success_record } = require("./brutes");
 
 // read json from incoming http request 
 function read_json(req) {
@@ -40,13 +41,28 @@ async function handle_login(req, res) {
             return res.end(JSON.stringify({ error: "username and password required" }));
         }
 
-        // check against bcrypt
+        let ip = req.socket?.remoteAddress || "unknown"; // ? for optional chaining & unknown for fallback
+        if (ip.startsWith("::ffff:")) { // normalize ip
+            ip = ip.slice(7);
+        }
+
+        const lockout = lockout_check(ip, username);
+        if (lockout.locked) {
+            res.writeHead(429, { "Content-Type": "application/json" }); // rate limiting
+            return res.end(JSON.stringify({
+                error: `Fail too many times. Try again in ${lockout.retry_after_sec} seconds`,
+                retry_after_sec: lockout.retry_after_sec}));
+        } 
+
+        // check against bcrypt (added fail recording)
         const ok = await verify_cred(username, password);
         if (!ok) {
+            fail_record(ip, username);
             res.writeHead(401, { "Content-Type": "application/json" });
             return res.end(JSON.stringify({ error: "invalid login info" }));
         }
 
+        success_record(ip, username);
         const { token, expire } = create_sesh(username);
         res.writeHead(200, { "Content-Type": "application/json" });
         res.end(JSON.stringify({ token, expire }));
