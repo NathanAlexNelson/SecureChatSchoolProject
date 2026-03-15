@@ -1,4 +1,4 @@
-const max_attempts = 2;
+const max_attempts = 5;
 const window = 15 * 60 * 1000; // 15 min
 
 const ip_attempts = new Map();

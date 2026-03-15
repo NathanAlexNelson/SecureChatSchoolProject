@@ -1,5 +1,6 @@
 const url = require("url");
 const { validate_sesh } = require("./sessions");
+const { key_store, get_key, remove_key } = require("./crypt");
 
 // ===== Rate limiting (per-IP sliding window) =====
 const rateMap = new Map();
@@ -56,6 +57,7 @@ function clean(ws) {
     const current = client_user.get(username);
     if (current === ws) client_user.delete(username);
     user_socket.delete(ws);
+    remove_key(username); // rid their key as well
 
     // disconnect notification
     broadcast({ type: "system",
@@ -152,7 +154,52 @@ function websocketcon(ws, req, wss) {
             return;
         }
 
-        // DM
+        if (message.type === "pubk_register") {
+            const pubk = String(message.pubk || "").trim();
+
+            if (!pubk) {
+                send_json(ws, { type: "error", 
+                                code: "PUBLICKEY_INVALID",
+                                message: "pubk_register needs {pubk} to work",
+                                ts: Date.now()
+                });
+                return;
+            }
+            key_store(username, pubk); // store after reg & handling
+            send_json(ws, { type: "pubkey_register_ack", ts: Date.now() }); // ready for use; front end handle 
+            return;
+        }
+
+        // request user for public key to encrypt session key
+        if (message.type === "pubk_request") {
+            const receiver = String(message.username || "").trim();
+            if (!receiver) {
+                send_json(ws, { type: "error", 
+                                code: "PUBKEY_REQ_INVALID",
+                                message: "pubk_request needs {username} to send to",
+                                ts: Date.now()
+                });
+                return;
+            }
+
+            const pubk = get_key(receiver);
+            if (!pubk) {
+                send_json(ws, { type: "error", 
+                                code: "PUBKEY_NOT_FOUND",
+                                message: "{receiver} doesn't have a public key",
+                                ts: Date.now()
+                });
+                return;
+            }
+
+            send_json(ws, { type: "pubk_response", 
+                            username: receiver,
+                            pubk,
+                            ts: Date.now()
+            });
+        }
+
+        // DM (doesn't pass plaintext anymore all cipher)
         if (message.type === "chat") {
             const to = String(message.to || "").trim();
             const text = String(message.text || "");
@@ -189,13 +236,12 @@ function websocketcon(ws, req, wss) {
             return;
         }
         
-        // error handling
-        send_json(JSON.stringify({
-            type: "error",
-            code: "UNKNOWN_TYPE",
-            message: `unknown type: ${message.type}`,
-            ts: Date.now()
-        }));
+        // error handling (error handled the error handle)
+        send_json(ws, { type: "error",
+                        code: "UNKNOWN_TYPE",
+                        message: `unknown type: ${message.type}`,
+                        ts: Date.now()
+        });
     });
     ws.on("close", () => clean(ws));
     ws.on("error", () => clean(ws));
