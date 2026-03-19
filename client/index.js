@@ -6,7 +6,7 @@ let usernameInp;
 let passwordInp;
 let serverIP;
 
-let loggedIn = false;
+let validUser = false;
 
 var socket;
 let TOKEN;
@@ -41,12 +41,12 @@ function updateUserDropdown(users) {
 //This is the button that should call to websocket
 LogButt.onclick = function(){
     usernameInp = document.getElementById("usernameBox").value.toLowerCase();
-    passwordInp = document.getElementById("passwordBox").value.toLowerCase();
+    passwordInp = document.getElementById("passwordBox").value;
     ipInp = document.getElementById("ipInp").value;
     validateFunc(usernameInp);
     validateIP(ipInp);
 
-    if (loggedIn == true && validIP == true){
+    if (validUser == true && validIP == true){
         fetch(`https://${ipInp}:8443/login`, {
             method: "POST",
             headers: {
@@ -62,6 +62,11 @@ LogButt.onclick = function(){
             console.log("Login response:", data);
 
             // Token created here
+            if (!data.ok) {
+                alert(data.error || "Login failed");
+                return;
+            }
+
             TOKEN = data.token;
             // Create WebSocket HERE
             socket = new WebSocket(`wss://${ipInp}:8443?token=${TOKEN}`);
@@ -106,6 +111,46 @@ LogButt.onclick = function(){
     }
 }
 
+//Register button uses same input as login
+RegButt.onclick = async function(){
+    usernameInp = document.getElementById("usernameBox").value.toLowerCase();
+    passwordInp = document.getElementById("passwordBox").value;
+    ipInp = document.getElementById("ipInp").value;
+    validateFunc(usernameInp);
+    validateIP(ipInp);
+
+    if (!validUser || !validIP) return;
+
+    try {
+        const res = await fetch(`https://${ipInp}:8443/register`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                username: usernameInp,
+                password: passwordInp
+            })
+        });
+
+        const data = await res.json();
+
+        if (!res.ok || !data.ok) {
+            throw new Error(data.error || "Registration failed");
+        }
+
+        console.log("Register response:", data);
+
+        alert("Account created successfully!");
+        document.getElementById("head2").textContent = `Registered as ${usernameInp}`;
+
+    } catch (err) {
+        console.error("Register failed:", err);
+        alert(err.message);
+        document.getElementById("head2").textContent = 'Registration Failed';
+    }
+}
+
 // Function to validate alphanumeric input does not check username that is done at server launch in backend
 function validateFunc(inputCheck) {
     let val = inputCheck.trim(); 
@@ -113,11 +158,11 @@ function validateFunc(inputCheck) {
     let Valid = RegEx.test(val);
     
     if (Valid) {
-        loggedIn = true;
+        validUser = true;
     }
     else {
         console.log("Invalid credentials");
-        loggedIn = false;
+        validUser = false;
     }
 }
 
@@ -143,7 +188,7 @@ OutButt.onclick = function () {
     outInp = document.getElementById("chatBox").value;
     sendTo = document.getElementById("sendTo").value;
 
-    if (loggedIn && socket && socket.readyState === WebSocket.OPEN) {
+    if (validUser && socket && socket.readyState === WebSocket.OPEN) {
 
         socket.send(JSON.stringify({
             type: "chat",
@@ -159,7 +204,7 @@ OutButt.onclick = function () {
 }
 
 LogoutButt.onclick = function () {
-    if (loggedIn && socket && socket.readyState === WebSocket.OPEN) {
+    if (validUser && socket && socket.readyState === WebSocket.OPEN) {
         document.getElementById("head2").textContent = 'Signing Out'
         socket.close(1000, 'Normal closure');
         Login.style.display = "block";
