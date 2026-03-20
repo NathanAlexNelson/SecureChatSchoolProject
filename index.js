@@ -4,25 +4,32 @@ document.getElementById("para2").textContent = "By: Alyaan Mir - Nathan Nelson -
 
 let usernameInp;
 let passwordInp;
-let serverIP;
+let outInp;
+let sendTo;
 
 let loggedIn = false;
 
-var socket;
+let socket;
 let TOKEN;
 
 let ipInp;
 let validIP = false;
 
-//This is the button that should call to websocket
-LogButt.onclick = function(){
-    usernameInp = document.getElementById("myText").value.toLowerCase();
-    passwordInp = document.getElementById("myText2").value.toLowerCase();
-    ipInp = document.getElementById("ipInp").value;
-    validateFunc(usernameInp);
-    validateIP(ipInp)
+let LogButt = document.getElementById("LogButt");
+let OutButt = document.getElementById("OutButt");
+let FTPbutt = document.getElementById("FTPbutt");
+let fileInput = document.getElementById("fileInput");
 
-    if (loggedIn == true && validIP == true){
+// login button
+LogButt.onclick = function () {
+    usernameInp = document.getElementById("myText").value.toLowerCase();
+    passwordInp = document.getElementById("myText2").value;
+    ipInp = document.getElementById("ipInp").value;
+
+    validateFunc(usernameInp);
+    validateIP(ipInp);
+
+    if (loggedIn === true && validIP === true) {
         fetch(`https://${ipInp}:8443/login`, {
             method: "POST",
             headers: {
@@ -37,88 +44,151 @@ LogButt.onclick = function(){
         .then(data => {
             console.log("Login response:", data);
 
-            // Token created here
+            if (!data.token) {
+                document.getElementById("head2").textContent = "Login failed";
+                return;
+            }
+
             TOKEN = data.token;
-            // Create WebSocket HERE
+
             socket = new WebSocket(`wss://${ipInp}:8443?token=${TOKEN}`);
 
-
-            //All of this has to be in the same function as token and socket creation
             socket.onopen = function () {
                 console.log("WebSocket connected!");
                 document.getElementById("head2").textContent = `Connected as ${usernameInp}`;
             };
 
-            // Displays messages to HTML
-            socket.onmessage = function(event) {
-                const data = JSON.parse(event.data);
+            socket.onmessage = function (event) {
+                const msg = JSON.parse(event.data);
+                const display = document.getElementById("head2");
 
-                console.log("Received from server:", data);
+                if (msg.type === "chat") {
+                    if (msg.text && msg.text.includes("/download/")) {
+                        let url = msg.text.split(" ").pop();
 
-                if (data.type === "chat") {
-                    document.getElementById("head2").textContent =
-                        `${data.from}: ${data.text}`;
+                        display.innerHTML = `
+                            📎 <b>${msg.from}</b> sent a file:
+                            <br>
+                            <a href="${url}" target="_blank">Download</a>
+                        `;
+                    } else {
+                        display.textContent = `${msg.from}: ${msg.text}`;
+                    }
                 }
             };
 
-            socket.onerror = function(e){
+            socket.onerror = function (e) {
                 console.log("WebSocket error:", e);
+                document.getElementById("head2").textContent = "WebSocket error";
             };
 
-            socket.onclose = function(e){
+            socket.onclose = function (e) {
                 console.log("WebSocket closed:", e.code, e.reason);
             };
         })
         .catch(err => {
             console.error("Login failed:", err);
+            document.getElementById("head2").textContent = "Login failed";
         });
     }
-}
+};
 
-// Function to validate alphanumeric input does not check username that is done at server launch in backend
+// validate username
 function validateFunc(inputCheck) {
-    let val = inputCheck.trim(); 
-    let RegEx = /^[a-z0-9.]+$/i; 
+    let val = inputCheck.trim();
+    let RegEx = /^[a-z0-9.]+$/i;
     let Valid = RegEx.test(val);
-    
+
     if (Valid) {
         loggedIn = true;
-    }
-    else {
+    } else {
         console.log("Invalid credentials");
         loggedIn = false;
     }
 }
 
-// Validates numbers and dots for IP
+// validate IP
 function validateIP(inputCheck) {
-    let val = inputCheck.trim(); 
-    let RegEx = /^[0-9.]+$/i; 
+    let val = inputCheck.trim();
+    let RegEx = /^[0-9.]+$/i;
     let Valid = RegEx.test(val);
-    
+
     if (Valid) {
         validIP = true;
-    }
-    else {
+    } else {
         console.log("IP is not valid!");
+        validIP = false;
     }
 }
 
+// send normal message
 OutButt.onclick = function () {
     outInp = document.getElementById("myText3").value;
     sendTo = document.getElementById("sendTo").value;
 
     if (loggedIn && socket && socket.readyState === WebSocket.OPEN) {
-
         socket.send(JSON.stringify({
             type: "chat",
             to: sendTo,
             text: outInp
         }));
 
+        document.getElementById("head2").textContent = `You → ${sendTo}: ${outInp}`;
         document.getElementById("myText3").value = "";
-
     } else {
         console.log("Not connected to WebSocket!");
+        document.getElementById("head2").textContent = "Not connected to WebSocket";
     }
-}
+};
+
+// send file
+FTPbutt.onclick = async function () {
+    const file = fileInput.files[0];
+    sendTo = document.getElementById("sendTo").value;
+
+    if (!file) {
+        console.log("No file selected");
+        document.getElementById("head2").textContent = "Select a file first";
+        return;
+    }
+
+    if (!sendTo) {
+        console.log("No recipient selected");
+        document.getElementById("head2").textContent = "Enter a receiver first";
+        return;
+    }
+
+    if (!(loggedIn && socket && socket.readyState === WebSocket.OPEN)) {
+        console.log("Not connected to WebSocket!");
+        document.getElementById("head2").textContent = "Not connected to WebSocket";
+        return;
+    }
+
+    try {
+        const buffer = await file.arrayBuffer();
+
+        const res = await fetch(`https://${ipInp}:8443/upload`, {
+            method: "POST",
+            body: buffer
+        });
+
+        const data = await res.json();
+        console.log("Upload response:", data);
+
+        const fileUrl = `https://${ipInp}:8443/download/${data.file}`;
+
+        socket.send(JSON.stringify({
+            type: "chat",
+            to: sendTo,
+            text: `📎 File from ${usernameInp}: ${fileUrl}`
+        }));
+
+        document.getElementById("head2").textContent =
+            `You sent file: ${file.name} to ${sendTo}`;
+
+        fileInput.value = "";
+    } catch (err) {
+        console.error("File upload failed:", err);
+        document.getElementById("head2").textContent = "File upload failed";
+    }
+};

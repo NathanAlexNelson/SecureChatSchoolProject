@@ -1,5 +1,6 @@
 const { handle_login, handle_reg } = require("./auth");
 const { list_users } = require("./users");
+const { handleUpload, handleDownload } = require("./files");
 
 // Basic CORS, just testing
 function Http(req, res) {
@@ -34,6 +35,17 @@ function Http(req, res) {
         const users = list_users();
         res.writeHead(200, { "Content-Type": "application/json" });
         return res.end(JSON.stringify({ users }));
+    }
+
+    // file upload
+    if (req.method === "POST" && req.url === "/upload") {
+        return handleUpload(req, res);
+    }
+
+    // file download
+    if (req.method === "GET" && req.url.startsWith("/download/")) {
+        const fileName = req.url.split("/download/")[1];
+        return handleDownload(req, res, fileName);
     }
 
     // error handling
