@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My First Website</title>
+    <link rel="stylesheet", href="style.css">
+</head>
+<body>
+    
+
+    <!--Login Boxes-->
+    <div id="Login">
+        <h1 id="head1"></h1>
+        <p id="para1"></p>
+        <label id="para2"></label>
+        <br>
+        <br>
+        <label>Username:</label>
+        <input id="usernameBox"></input>
+
+        <br>
+        <label>Password:</label>
+        <input id="passwordBox" type="password"></input>
+
+        <br>
+        <label>Server IP:</label>
+        <input id="ipInp"></input>
+        
+        <!--BUTTONS!-->        
+        <div id="buttons">
+            <button id="LogButt" class="butts">Login</button>
+            <button id="RegButt" class="butts">Register</button>
+        </div>
+    </div>
+
+
+
+    <!--Chat Boxes-->
+    <!--style="display: none;"-->
+    
+    <div id="Chat">
+        <br>
+        <label>Receiver:</label>
+        <select id="sendTo"></select>
+        <br>
+        <label>Output:</label>
+        <input id="chatBox" size = "50"></input>
+        <div id="buttons2">
+            <button id="OutButt" class="butts">Send</button>
+            <button id="FTPButt" class="butts">Upload File...</button>
+            <button id="LogoutButt" class="butts">Logout</button>
+        </div>
+        <br>
+        <h2 id="head2"></h2>
+
+        <script src="index.js"></script>
+    </div>
+</body>
+</html>
