@@ -201,6 +201,7 @@ function websocketcon(ws, req, wss) {
                             pubk,
                             ts: Date.now()
             });
+            return; //forgot
         }
 
         // DM (doesn't pass plaintext anymore all cipher)

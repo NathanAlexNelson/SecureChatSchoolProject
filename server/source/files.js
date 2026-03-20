@@ -1,5 +1,6 @@
 const fs = require("fs");
 const path = require("path");
+const { validate_sesh } = require("./sessions");
 
 const uploadDir = path.join(__dirname, "../data/uploads");
 
@@ -8,10 +9,24 @@ if (!fs.existsSync(uploadDir)) {
 }
 
 function handleUpload(req, res) {
+    // validate uploader's session 
+    const token = req.headers["authorization"]?.replace("Sender ", "");
+    const sesh = validate_sesh(token);
+    if (!sesh) {
+        res.writeHead(401, { "Content-Type": "application/json" });
+        return res.end(JSON.stringify({ error: "unauthorized session" }));
+    }
     let body = [];
 
+    // size limit added to prevent crashing
     req.on("data", chunk => {
         body.push(chunk);
+        const total = body.reduce((acc, c) => acc + c.length, 0);
+        if (total > 10 * 1024 * 1024) {
+            res.writeHead(413, { "Content-Type": "application/json" });
+            res.end(JSON.stringify({ error: "File too large" }));
+            req.destroy();
+        } 
     });
 
     req.on("end", () => {
@@ -32,6 +47,7 @@ function handleUpload(req, res) {
 
 function handleDownload(req, res, fileName) {
 
+    const safe = path.basename(fileName); // path traversal handling
     const filePath = path.join(uploadDir, fileName);
 
     if (!fs.existsSync(filePath)) {
