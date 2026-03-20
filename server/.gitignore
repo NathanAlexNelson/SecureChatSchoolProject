@@ -3,3 +3,5 @@ certs/
 *.pem
 *.key
 data/users.json
+source/crypt_test.js
+logs/*.txt

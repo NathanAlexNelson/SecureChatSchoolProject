@@ -1,6 +1,7 @@
 const url = require("url");
 const { validate_sesh } = require("./sessions");
 const { key_store, get_key, remove_key } = require("./crypt");
+const { log_msg, close_log } = require("./log")
 
 // ===== Rate limiting (per-IP sliding window) =====
 const rateMap = new Map();
@@ -57,7 +58,10 @@ function clean(ws) {
     const current = client_user.get(username);
     if (current === ws) client_user.delete(username);
     user_socket.delete(ws);
+
+    // phase 2
     remove_key(username); // rid their key as well
+    close_log(username); // close log on top
 
     // disconnect notification
     broadcast({ type: "system",
@@ -228,6 +232,9 @@ function websocketcon(ws, req, wss) {
                                    text,
                                    ts: Date.now()
             });
+
+            // phase 2 logging messages
+            log_msg(username, to, text);
             
             send_json(ws, { type: "chat_ack", 
                             to,
