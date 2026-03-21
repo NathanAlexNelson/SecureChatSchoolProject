@@ -86,14 +86,25 @@ LogButt.onclick = function(){
 
                 console.log("Received from server:", data);
 
+                // Chat function
                 if (data.type === "chat") {
                     document.getElementById("head2").textContent =
                         `${data.from}: ${data.text}`;
                 }
 
-                if (data.type === "users") {
-                    // server sends: { type: "users", users: ["alice", "bob"] }
-                    updateUserDropdown(data.users);
+                // Initial users
+                if (data.type === "system" && data.event === "connected") {
+                    updateUserDropdown(data.online);
+                }
+
+                //Join
+                if (data.type === "system" && data.event === "join") {
+                    addUserToDropdown(data.user);
+                }
+
+                //Leave
+                if (data.type === "system" && data.event === "leave") {
+                    removeUserFromDropdown(data.user);
                 }
             };
 
