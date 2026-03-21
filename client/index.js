@@ -90,6 +90,14 @@ LogButt.onclick = function(){
                 if (data.type === "chat") {
                     document.getElementById("head2").textContent =
                         `${data.from}: ${data.text}`;
+                    
+                    if (data.text.includes("File: ") && data.text.includes("has been sent")) {
+                        // Extract the file name from the message
+                        const fileName = data.text.split("File: ")[1].split(" has been sent")[0];
+
+                        // Create a download button for this file
+                        createDownloadButton(fileName);
+                    }
                 }
 
                 // Initial users
@@ -191,9 +199,48 @@ function validateIP(inputCheck) {
     }
 }
 
-FTPButt.onclick = function () {
-    
-}
+FTPButt.onclick = async function () {
+    const fileInput = document.getElementById("fileInput");
+    const file = fileInput.files[0];
+
+    if (!file) {
+        alert("Please select a file first");
+        return;
+    }
+
+    try {
+        const res = await fetch(`https://${ipInp}:8443/upload`, {
+            method: "POST",
+            headers: {
+                "Authorization": `Sender ${TOKEN}`
+            },
+            body: file
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) {
+            throw new Error(data.error || "Upload failed");
+        }
+
+        console.log("Upload success:", data);
+        alert(`Uploaded: ${data.file}`);
+
+        // Notify recipient via WebSocket
+        if (validUser && socket && socket.readyState === WebSocket.OPEN) {
+            const sendTo = document.getElementById("sendTo").value;
+            socket.send(JSON.stringify({
+                type: "chat",
+                to: sendTo,
+                text: `File: ${data.file} has been sent!`
+            }));
+        }
+
+    } catch (err) {
+        console.error("Upload error:", err);
+        alert(err.message);
+    }
+};
 
 OutButt.onclick = function () {
     outInp = document.getElementById("chatBox").value;
@@ -221,4 +268,45 @@ LogoutButt.onclick = function () {
         Login.style.display = "block";
         Chat.style.display = "none";
     }
+}
+
+// FTP download button
+function createDownloadButton(fileName) {
+    const container = document.getElementById("fileButtons");
+
+    // Create the button
+    const btn = document.createElement("button");
+    btn.textContent = `Download ${fileName}`;
+    btn.style.margin = "5px";
+
+    // When clicked, download the file
+    btn.onclick = async function () {
+        try {
+            const res = await fetch(`https://${ipInp}:8443/download/${fileName}`, {
+                method: "GET",
+                headers: {
+                    "Authorization": `Sender ${TOKEN}`
+                }
+            });
+
+            if (!res.ok) throw new Error("Download failed");
+
+            const blob = await res.blob();
+            const url = window.URL.createObjectURL(blob);
+
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = fileName;
+            a.click();
+
+            // Clean up
+            window.URL.revokeObjectURL(url);
+
+        } catch (err) {
+            console.error(err);
+            alert("Download failed: " + err.message);
+        }
+    };
+
+    container.appendChild(btn);
 }
