@@ -3,7 +3,8 @@
 const fs = require("fs");
 const path = require("path");
 
-const logdir = path.join(__dirname, "../logs");
+const base = path.dirname(process.execPath);
+const logdir = path.join(base, "../logs");
 
 if (!fs.existsSync(logdir)) {
     fs.mkdirSync(logdir, { recursive: true }) // no error if parent folders missing; makes folder automatically

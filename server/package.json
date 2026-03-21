@@ -2,12 +2,19 @@
   "name": "proj_securechat_server",
   "version": "0.1.0",
   "main": "source/server.js",
+  "bin": "source/server.js",
   "type": "commonjs",
   "scripts": {
-    "start": "node source/server.js"
+    "start": "node source/server.js",
+    "build": "pkg . --targets node18-win-x64 --output server.exe"
+  },
+  "pkg": {
+    "assets": [
+      "source/**/*"
+    ]
   },
   "dependencies": {
-    "bcrypt": "^6.0.0",
+    "bcryptjs": "^3.0.3",
     "ws": "^8.19.0"
   },
   "description": "",
