@@ -71,6 +71,10 @@ function clean(ws) {
                 ws);
 }
 
+function list_online() {
+    return Array.from(client_user.keys());
+}
+
 function websocketcon(ws, req, wss) {
     const parsed = url.parse(req.url, true);
     const token = parsed.query.token;
@@ -114,7 +118,7 @@ function websocketcon(ws, req, wss) {
     send_json(ws, { type: "system", 
                     event: "connected",
                     user: username,
-                    online: Array.from(client_user.keys()),
+                    online: list_online(),
                     ts: Date.now(),
     });
 
@@ -255,4 +259,4 @@ function websocketcon(ws, req, wss) {
     ws.on("error", () => clean(ws));
 }
 
-module.exports = { websocketcon };
+module.exports = { websocketcon, list_online };
