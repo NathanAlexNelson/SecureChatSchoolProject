@@ -1,0 +1,7 @@
+node_modules/
+certs/
+*.pem
+*.key
+server/data/users.json
+server/data/uploads/
+server/logs/*.txt

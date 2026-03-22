@@ -1,7 +1,7 @@
 const url = require("url");
 const { validate_sesh } = require("./sessions");
 const { key_store, get_key, remove_key } = require("./crypt");
-const { log_msg, close_log } = require("./log")
+const { log_msg, close_log } = require("./log");
 
 // ===== Rate limiting (per-IP sliding window) =====
 const rateMap = new Map();
