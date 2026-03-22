@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My First Website</title>
+    <title>SecureTech Chat Client</title>
     <link rel="stylesheet", href="style.css">
 </head>
 <body>
@@ -41,16 +41,20 @@
     
     <div id="Chat">
         <br>
-        <label>Receiver:</label>
+        <label>Online Users:</label>
         <select id="sendTo"></select>
         <br>
         <label>Output:</label>
         <input id="chatBox" size = "50"></input>
+        <br>
+        <input type="file" id="fileInput"/>
         <div id="buttons2">
             <button id="OutButt" class="butts">Send</button>
-            <button id="FTPButt" class="butts">Upload File...</button>
+            <button id="FTPButt" class="butts">Send File</button>
             <button id="LogoutButt" class="butts">Logout</button>
         </div>
+        <br>
+        <div id="fileButtons"></div>
         <br>
         <h2 id="head2"></h2>
 
