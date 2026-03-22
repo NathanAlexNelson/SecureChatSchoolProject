@@ -49,7 +49,7 @@ function handleUpload(req, res) {
 function handleDownload(req, res, fileName) {
 
     const safe = path.basename(fileName); // path traversal handling
-    const filePath = path.join(uploadDir, fileName);
+    const filePath = path.join(uploadDir, safe);
 
     if (!fs.existsSync(filePath)) {
         res.writeHead(404);
