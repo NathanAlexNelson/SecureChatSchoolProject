@@ -35,7 +35,7 @@ function log_msg(from, to, text) {
     // if no log file
     if (!logmap.has(key)) {
         const [firstuser, secuser] = key.split(":");
-        const fname = `${timestampfile()}_${firstuser}_${secuser}.txt`;
+        const fname = `${firstuser}_${secuser}.txt`;
         const fpath = path.join(logdir, fname);
         // session header
         const header = [`SecureChat Session Log`,
