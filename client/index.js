@@ -64,7 +64,7 @@ LogButt.onclick = async function(){
 
         console.log("Login response:", data);
 
-        if (!res.ok || !data.ok) {
+        if (!res.ok) {
             throw new Error(data.error || "Login failed");
         }
 
