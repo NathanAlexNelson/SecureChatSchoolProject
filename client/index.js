@@ -39,15 +39,17 @@ function updateUserDropdown(users) {
 }
 
 //This is the button that should call to websocket
-LogButt.onclick = function(){
+LogButt.onclick = async function(){
     usernameInp = document.getElementById("usernameBox").value.toLowerCase();
     passwordInp = document.getElementById("passwordBox").value;
     ipInp = document.getElementById("ipInp").value;
     validateFunc(usernameInp);
     validateIP(ipInp);
 
-    if (validUser == true && validIP == true){
-        fetch(`https://${ipInp}:8443/login`, {
+    if (!validUser || !validIP) return;
+
+    try {
+        const res = await fetch(`https://${ipInp}:8443/login`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"
@@ -56,77 +58,68 @@ LogButt.onclick = function(){
                 username: usernameInp,
                 password: passwordInp
             })
-        })
-        .then(res => res.json())
-        .then(data => {
-            console.log("Login response:", data);
+        });
 
-            // Token created here
-            if (!data.ok) {
-                alert(data.error || "Login failed");
-                return;
+        const data = await res.json();
+
+        console.log("Login response:", data);
+
+        if (!res.ok || !data.ok) {
+            throw new Error(data.error || "Login failed");
+        }
+
+        TOKEN = data.token;
+
+        // Create WebSocket
+        socket = new WebSocket(`wss://${ipInp}:8443?token=${TOKEN}`);
+
+        socket.onopen = function () {
+            console.log("WebSocket connected!");
+            document.getElementById("head2").textContent = `Connected as ${usernameInp}`;
+            Login.style.display = "none";
+            Chat.style.display = "block";
+        };
+
+        socket.onmessage = function (event) {
+            const data = JSON.parse(event.data);
+
+            console.log("Received from server:", data);
+
+            if (data.type === "chat") {
+                document.getElementById("head2").textContent =
+                    `${data.from}: ${data.text}`;
+
+                if (data.text.includes("File: ") && data.text.includes("has been sent")) {
+                    const fileName = data.text.split("File: ")[1].split(" has been sent")[0];
+                    createDownloadButton(fileName);
+                }
             }
 
-            TOKEN = data.token;
-            // Create WebSocket HERE
-            socket = new WebSocket(`wss://${ipInp}:8443?token=${TOKEN}`);
+            if (data.type === "system" && data.event === "connected") {
+                updateUserDropdown(data.online);
+            }
 
+            if (data.type === "system" && data.event === "join") {
+                addUserToDropdown(data.user);
+            }
 
-            // Onopen and onmessage need to be together to function
-            socket.onopen = function () {
-                console.log("WebSocket connected!");
-                document.getElementById("head2").textContent = `Connected as ${usernameInp}`;
-                Login.style.display = "none";
-                Chat.style.display = "block";
-            };
+            if (data.type === "system" && data.event === "leave") {
+                removeUserFromDropdown(data.user);
+            }
+        };
 
-            // Displays messages to HTML
-            socket.onmessage = function(event) {
-                const data = JSON.parse(event.data);
+        socket.onerror = function (e) {
+            console.log("WebSocket error:", e);
+        };
 
-                console.log("Received from server:", data);
+        socket.onclose = function (e) {
+            console.log("WebSocket closed:", e.code, e.reason);
+        };
 
-                // Chat function
-                if (data.type === "chat") {
-                    document.getElementById("head2").textContent =
-                        `${data.from}: ${data.text}`;
-                    
-                    if (data.text.includes("File: ") && data.text.includes("has been sent")) {
-                        // Extract the file name from the message
-                        const fileName = data.text.split("File: ")[1].split(" has been sent")[0];
-
-                        // Create a download button for this file
-                        createDownloadButton(fileName);
-                    }
-                }
-
-                // Initial users
-                if (data.type === "system" && data.event === "connected") {
-                    updateUserDropdown(data.online);
-                }
-
-                //Join
-                if (data.type === "system" && data.event === "join") {
-                    addUserToDropdown(data.user);
-                }
-
-                //Leave
-                if (data.type === "system" && data.event === "leave") {
-                    removeUserFromDropdown(data.user);
-                }
-            };
-
-            socket.onerror = function(e){
-                console.log("WebSocket error:", e);
-            };
-
-            socket.onclose = function(e){
-                console.log("WebSocket closed:", e.code, e.reason);
-            };
-        })
-        .catch(err => {
-            console.error("Login failed:", err);
-        });
+    } catch (err) {
+        console.error("Login failed:", err);
+        alert(err.message);
+        document.getElementById("head2").textContent = "Login Failed";
     }
 }
 
@@ -309,4 +302,25 @@ function createDownloadButton(fileName) {
     };
 
     container.appendChild(btn);
+}
+
+//Shows logs of each user
+async function loadLogs() {
+    const otherUser = document.getElementById("sendTo").value;
+
+    try {
+        const res = await fetch(`https://${ipInp}:8443/logs/${usernameInp}/${otherUser}`, {
+            method: "GET"
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) throw new Error(data.error);
+
+        document.getElementById("logBox").textContent = data.log;
+
+    } catch (err) {
+        console.error(err);
+        alert("No logs found or failed to load");
+    }
 }

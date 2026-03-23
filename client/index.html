@@ -36,10 +36,12 @@
 
 
 
-    <!--Chat Boxes-->
-    <!--style="display: none;"-->
-    
-    <div id="Chat">
+    <!--Chat Boxes-->    
+    <div id="Chat" style="display: none;">
+        <Label>Message Log:</Label>
+        <textarea id="logBox" rows="15" cols="60" readonly></textarea>
+        <br>
+        <button onclick="loadLogs()">Load Chat History</button>
         <br>
         <label>Online Users:</label>
         <select id="sendTo"></select>
