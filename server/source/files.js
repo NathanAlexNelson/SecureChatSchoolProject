@@ -3,7 +3,7 @@ const path = require("path");
 const { validate_sesh } = require("./sessions");
 const base = path.dirname(process.execPath);
 
-const uploadDir = path.join(base, "/data/uploads");
+const uploadDir = path.join(base, "data/uploads");
 
 if (!fs.existsSync(uploadDir)) {
     fs.mkdirSync(uploadDir, { recursive: true });

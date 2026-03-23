@@ -4,7 +4,7 @@ const path = require("path");
 const base = path.dirname(process.execPath);
 
 // users persist to json 
-const users_file = path.join(base, "../data/users.json");
+const users_file = path.join(base, "data/users.json");
 const bcrypt_rounds = 12; // pass scramble 
 
 // username validation 
