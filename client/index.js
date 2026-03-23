@@ -2,6 +2,7 @@ document.getElementById("head1").textContent = "SecureTech Chat Client";
 document.getElementById("para1").textContent = "CPSC 455 - Michael Franklin";
 document.getElementById("para2").textContent = "By: Alyaan Mir - Nathan Nelson - Tyler Huynh";
 
+let users = [];
 let usernameInp;
 let passwordInp;
 let serverIP;
@@ -21,6 +22,21 @@ const LogoutButt = document.getElementById("LogoutButt");
 
 const Login = document.getElementById("Login");
 const Chat = document.getElementById("Chat");
+
+// Add a user to the list and update dropdown
+function addUserToDropdown(user) {
+    if (user === usernameInp) return; // Prevent adding self
+    if (!users.includes(user)) {
+        users.push(user);
+        updateUserDropdown(users);
+    }
+}
+
+// Remove a user from the list and update dropdown
+function removeUserFromDropdown(user) {
+    users = users.filter(u => u !== user);
+    updateUserDropdown(users);
+}
 
 function updateUserDropdown(users) {
     const select = document.getElementById("sendTo");
@@ -309,7 +325,7 @@ async function loadLogs() {
     const otherUser = document.getElementById("sendTo").value;
 
     try {
-        const res = await fetch(`https://${ipInp}:8443/logs/${usernameInp}/${otherUser}`, {
+        const res = await fetch(`https://${ipInp}:8443/logs/${firstuser}_${secuser}.txt`, {
             method: "GET"
         });
 
