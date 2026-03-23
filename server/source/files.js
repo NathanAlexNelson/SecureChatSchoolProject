@@ -32,7 +32,8 @@ function handleUpload(req, res) {
 
     req.on("end", () => {
         const buffer = Buffer.concat(body);
-        const fileName = "upload_" + Date.now();
+        const OGname = req.headers["x-filename"] || "file"; // hotfix
+        const fileName = `upload_${Date.now()}_${OGname}`;
 
         const filePath = path.join(uploadDir, fileName);
 
@@ -60,7 +61,7 @@ function handleDownload(req, res, fileName) {
 
     res.writeHead(200, {
         "Content-Type": "application/octet-stream",
-        "Content-Disposition": `attachment; filename="${safe}"`
+        "Content-Disposition": `attachment; filename="${path.basename(fileName)}"`
     });
 
     file.pipe(res);
