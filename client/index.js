@@ -221,7 +221,8 @@ FTPButt.onclick = async function () {
         const res = await fetch(`https://${ipInp}:8443/upload`, {
             method: "POST",
             headers: {
-                "Authorization": `Sender ${TOKEN}`
+                "Authorization": `Sender ${TOKEN}`,
+                "x-filename": file.name // forgot to add header
             },
             body: file
         });
