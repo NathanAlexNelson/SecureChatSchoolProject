@@ -1,7 +1,7 @@
 const fs = require("fs");
 const path = require("path");
 const { validate_sesh } = require("./sessions");
-const base = path.dirname(process.execPath);
+const base = process.env.NODE_ENV === "production" ? path.join(__dirname, "..") : path.dirname(process.execPath);
 
 const uploadDir = path.join(base, "data/uploads");
 

@@ -247,6 +247,18 @@ function websocketcon(ws, req, wss) {
             });
             return;
         }
+
+        if (message.type === "typing") {
+            const to = String(message.to || "").trim();
+            if (!to) return;
+            const to_socket = client_user.get(to);
+            if (!to_socket) return;
+
+            send_json(to_socket, { type: "typing", 
+                                   from: username,
+                                   ts: Date.now() });
+            return;
+        }
         
         // error handling (error handled the error handle)
         send_json(ws, { type: "error",

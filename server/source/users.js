@@ -1,7 +1,7 @@
 const bcrypt = require("bcryptjs");
 const fs = require("fs");
 const path = require("path");
-const base = path.dirname(process.execPath);
+const base = process.env.NODE_ENV === "production" ? path.join(__dirname, "..") : path.dirname(process.execPath);
 
 // users persist to json 
 const users_file = path.join(base, "data/users.json");

@@ -3,7 +3,7 @@
 const fs = require("fs");
 const path = require("path");
 
-const base = path.dirname(process.execPath);
+const base = process.env.NODE_ENV === "production" ? path.join(__dirname, "..") : path.dirname(process.execPath);
 const logdir = path.join(base, "logs");
 
 if (!fs.existsSync(logdir)) {
@@ -15,14 +15,6 @@ const logmap = new Map();
 // key always formats alphabetically regardless of first sender
 function key_pair(firstuser, secuser) {
     return [firstuser, secuser].sort().join(":");
-}
-
-// file format as yyyy-mm-dd_time
-function timestampfile() {
-    const rn = new Date();
-    const date = rn.toISOString().slice(0, 10);
-    const time = rn.toTimeString().slice(0, 8).replace(/:/g, "");
-    return `${date}_${time}`;
 }
 
 function ts_entry() {
