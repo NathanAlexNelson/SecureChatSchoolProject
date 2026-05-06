@@ -194,7 +194,7 @@ function websocketcon(ws, req, wss) {
             if (!pubk) {
                 send_json(ws, { type: "error", 
                                 code: "PUBKEY_NOT_FOUND",
-                                message: "{receiver} doesn't have a public key",
+                                message: `${receiver} doesn't have a public key`,
                                 ts: Date.now()
                 });
                 return;
