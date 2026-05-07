@@ -1,0 +1,90 @@
+.
+├── CHANGELOG.md
+├── client
+│   ├── index.html
+│   ├── index.js
+│   └── style.css
+├── git_detailed_history.txt
+├── git_detailed_history_updated.txt
+├── git_history.txt
+├── git_history_updated.txt
+├── index.html
+├── index.js
+├── main.js
+├── package.json
+├── package-lock.json
+├── project_structure.txt
+├── project_structure_updated.txt
+├── server
+│   ├── certs
+│   │   ├── server-cert.pem
+│   │   └── server-key.pem
+│   ├── data
+│   │   ├── uploads
+│   │   │   ├── upload_1773789237192
+│   │   │   ├── upload_1773996557856
+│   │   │   └── upload_1773998711884
+│   │   └── users.json
+│   ├── node_modules
+│   │   ├── bcrypt
+│   │   │   ├── bcrypt.js
+│   │   │   ├── binding.gyp
+│   │   │   ├── build-all.sh
+│   │   │   ├── CHANGELOG.md
+│   │   │   ├── Dockerfile
+│   │   │   ├── Dockerfile-alpine
+│   │   │   ├── examples
+│   │   │   ├── ISSUE_TEMPLATE.md
+│   │   │   ├── LICENSE
+│   │   │   ├── Makefile
+│   │   │   ├── package.json
+│   │   │   ├── prebuilds
+│   │   │   ├── promises.js
+│   │   │   ├── README.md
+│   │   │   ├── SECURITY.md
+│   │   │   ├── src
+│   │   │   └── test
+│   │   ├── node-addon-api
+│   │   │   ├── common.gypi
+│   │   │   ├── except.gypi
+│   │   │   ├── index.js
+│   │   │   ├── LICENSE.md
+│   │   │   ├── napi.h
+│   │   │   ├── napi-inl.deprecated.h
+│   │   │   ├── napi-inl.h
+│   │   │   ├── node_addon_api.gyp
+│   │   │   ├── node_api.gyp
+│   │   │   ├── noexcept.gypi
+│   │   │   ├── nothing.c
+│   │   │   ├── package.json
+│   │   │   ├── package-support.json
+│   │   │   ├── README.md
+│   │   │   └── tools
+│   │   └── node-gyp-build
+│   │       ├── bin.js
+│   │       ├── build-test.js
+│   │       ├── index.js
+│   │       ├── LICENSE
+│   │       ├── node-gyp-build.js
+│   │       ├── optional.js
+│   │       ├── package.json
+│   │       ├── README.md
+│   │       └── SECURITY.md
+│   ├── package.json
+│   ├── package-lock.json
+│   ├── server.exe
+│   └── source
+│       ├── auth.js
+│       ├── brutes.js
+│       ├── config.js
+│       ├── crypt.js
+│       ├── files.js
+│       ├── log.js
+│       ├── routes.js
+│       ├── server.js
+│       ├── sessions.js
+│       ├── users.js
+│       └── ws.js
+└── style.css
+
+15 directories, 72 files

@@ -1,3 +1,10 @@
+import { createClient } from 'https://esm.sh/@supabase/supabase-js'
+
+const SUPABASE_URL = 'https://lvakoxjxljptsbwdwjly.supabase.co'
+const SUPABASE_ANON_KEY = 'sb_publishable_3VSIHvfenIlg1dWugzdMFw_E4Li81YG'
+
+const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+
 document.getElementById("head1").textContent = "SecureTech Chat Client";
 document.getElementById("para1").textContent = "CPSC 455 - Michael Franklin";
 document.getElementById("para2").textContent = "By: Alyaan Mir - Nathan Nelson - Tyler Huynh";
@@ -5,8 +12,6 @@ document.getElementById("para2").textContent = "By: Alyaan Mir - Nathan Nelson -
 let users = [];
 let usernameInp;
 let passwordInp;
-let serverIP;
-
 let validUser = false;
 
 var socket;
@@ -16,23 +21,68 @@ let ipInp;
 let validIP = false;
 
 const LogButt = document.getElementById("LogButt");
+const RegButt = document.getElementById("RegButt");
 const OutButt = document.getElementById("OutButt");
 const FTPButt = document.getElementById("FTPButt");
 const LogoutButt = document.getElementById("LogoutButt");
+const LoadLogsButt = document.getElementById("LoadLogsButt");
 
 const Login = document.getElementById("Login");
 const Chat = document.getElementById("Chat");
 
-// Add a user to the list and update dropdown
+function validateFileBeforeUpload(file) {
+    const maxSize = 25 * 1024 * 1024;
+
+    const blockedExtensions = [
+        ".exe", ".bat", ".cmd", ".sh", ".dll",
+        ".msi", ".ps1", ".vbs", ".scr"
+    ];
+
+    const allowedTypes = [
+        "image/png",
+        "image/jpeg",
+        "image/gif",
+        "application/pdf",
+        "text/plain",
+        "application/zip",
+        "video/mp4"
+    ];
+
+    const lowerName = file.name.toLowerCase();
+
+    if (file.size > maxSize) return "File exceeds 25MB limit";
+
+    if (blockedExtensions.some(ext => lowerName.endsWith(ext))) {
+        return "Blocked potentially dangerous file type";
+    }
+
+// some Electron/browser environments return empty MIME types
+if (
+    !allowedTypes.includes(file.type) &&
+    !lowerName.endsWith(".txt") &&
+    !lowerName.endsWith(".png") &&
+    !lowerName.endsWith(".jpg") &&
+    !lowerName.endsWith(".jpeg") &&
+    !lowerName.endsWith(".gif") &&
+    !lowerName.endsWith(".pdf") &&
+    !lowerName.endsWith(".zip") &&
+    !lowerName.endsWith(".mp4")
+) {
+    return "Unsupported file type";
+}
+
+    return null;
+}
+
 function addUserToDropdown(user) {
-    if (user === usernameInp) return; // Prevent adding self
+    if (user === usernameInp) return;
+
     if (!users.includes(user)) {
         users.push(user);
         updateUserDropdown(users);
     }
 }
 
-// Remove a user from the list and update dropdown
 function removeUserFromDropdown(user) {
     users = users.filter(u => u !== user);
     updateUserDropdown(users);
@@ -40,12 +90,10 @@ function removeUserFromDropdown(user) {
 
 function updateUserDropdown(users) {
     const select = document.getElementById("sendTo");
-
-    // Clear old list
     select.innerHTML = "";
 
     users.forEach(user => {
-        if (user === usernameInp) return; //Prevents user from messaging themself
+        if (user === usernameInp) return;
 
         const option = document.createElement("option");
         option.value = user;
@@ -54,11 +102,11 @@ function updateUserDropdown(users) {
     });
 }
 
-//This is the button that should call to websocket
-LogButt.onclick = async function(){
+LogButt.onclick = async function () {
     usernameInp = document.getElementById("usernameBox").value.toLowerCase();
     passwordInp = document.getElementById("passwordBox").value;
     ipInp = document.getElementById("ipInp").value;
+
     validateFunc(usernameInp);
     validateIP(ipInp);
 
@@ -67,9 +115,7 @@ LogButt.onclick = async function(){
     try {
         const res = await fetch(`https://${ipInp}:8443/login`, {
             method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
+            headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
                 username: usernameInp,
                 password: passwordInp
@@ -78,15 +124,12 @@ LogButt.onclick = async function(){
 
         const data = await res.json();
 
-        console.log("Login response:", data);
-
         if (!res.ok) {
             throw new Error(data.error || "Login failed");
         }
 
         TOKEN = data.token;
 
-        // Create WebSocket
         socket = new WebSocket(`wss://${ipInp}:8443?token=${TOKEN}`);
 
         socket.onopen = function () {
@@ -105,9 +148,14 @@ LogButt.onclick = async function(){
                 document.getElementById("head2").textContent =
                     `${data.from}: ${data.text}`;
 
-                if (data.text.includes("File: ") && data.text.includes("has been sent")) {
-                    const fileName = data.text.split("File: ")[1].split(" has been sent")[0];
-                    createDownloadButton(fileName);
+                if (data.text.includes("Cloud File:")) {
+                    const lines = data.text.split("\n");
+                    const label = lines[0];
+                    const url = lines[1];
+
+                    const fileName = label.replace("Cloud File: ", "");
+
+                    createCloudDownloadButton(fileName, url);
                 }
             }
 
@@ -137,13 +185,13 @@ LogButt.onclick = async function(){
         alert(err.message);
         document.getElementById("head2").textContent = "Login Failed";
     }
-}
+};
 
-//Register button uses same input as login
-RegButt.onclick = async function(){
+RegButt.onclick = async function () {
     usernameInp = document.getElementById("usernameBox").value.toLowerCase();
     passwordInp = document.getElementById("passwordBox").value;
     ipInp = document.getElementById("ipInp").value;
+
     validateFunc(usernameInp);
     validateIP(ipInp);
 
@@ -152,9 +200,7 @@ RegButt.onclick = async function(){
     try {
         const res = await fetch(`https://${ipInp}:8443/register`, {
             method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
+            headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
                 username: usernameInp,
                 password: passwordInp
@@ -163,11 +209,9 @@ RegButt.onclick = async function(){
 
         const data = await res.json();
 
-        if (!res.ok) {
+        if (!res.ok || !data.ok) {
             throw new Error(data.error || "Registration failed");
         }
-
-        console.log("Register response:", data);
 
         alert("Account created successfully!");
         document.getElementById("head2").textContent = `Registered as ${usernameInp}`;
@@ -175,36 +219,27 @@ RegButt.onclick = async function(){
     } catch (err) {
         console.error("Register failed:", err);
         alert(err.message);
-        document.getElementById("head2").textContent = 'Registration Failed';
+        document.getElementById("head2").textContent = "Registration Failed";
     }
-}
+};
 
-// Function to validate alphanumeric input does not check username that is done at server launch in backend
 function validateFunc(inputCheck) {
-    let val = inputCheck.trim(); 
-    let RegEx = /^[a-z0-9.]+$/i; 
-    let Valid = RegEx.test(val);
-    
-    if (Valid) {
-        validUser = true;
-    }
-    else {
-        console.log("Invalid credentials");
-        validUser = false;
+    let val = inputCheck.trim();
+    let RegEx = /^[a-z0-9.]+$/i;
+    validUser = RegEx.test(val);
+
+    if (!validUser) {
+        alert("Invalid username. Use letters, numbers, or dots only.");
     }
 }
 
-// Validates numbers and dots for IP
 function validateIP(inputCheck) {
-    let val = inputCheck.trim(); 
-    let RegEx = /^[0-9.]+$/i; 
-    let Valid = RegEx.test(val);
-    
-    if (Valid) {
-        validIP = true;
-    }
-    else {
-        console.log("IP is not valid!");
+    let val = inputCheck.trim();
+    let RegEx = /^[0-9.]+$/i;
+    validIP = RegEx.test(val);
+
+    if (!validIP) {
+        alert("Invalid IP address.");
     }
 }
 
@@ -217,119 +252,110 @@ FTPButt.onclick = async function () {
         return;
     }
 
+    const validationError = validateFileBeforeUpload(file);
+
+    if (validationError) {
+        alert(validationError);
+        return;
+    }
+
     try {
-        const res = await fetch(`https://${ipInp}:8443/upload`, {
-            method: "POST",
-            headers: {
-                "Authorization": `Sender ${TOKEN}`
-            },
-            body: file
-        });
+        const safeName =
+            Date.now() +
+            "_" +
+            usernameInp +
+            "_" +
+            file.name.replace(/[^a-zA-Z0-9._-]/g, "_");
 
-        const data = await res.json();
+        const { error } = await supabase.storage
+            .from("securechat-files")
+            .upload(safeName, file, {
+                cacheControl: "3600",
+                upsert: false
+            });
 
-        if (!res.ok) {
-            throw new Error(data.error || "Upload failed");
+        if (error) {
+            throw error;
         }
 
-        console.log("Upload success:", data);
-        alert(`Uploaded: ${data.file}`);
+        const { data: publicData } = supabase.storage
+            .from("securechat-files")
+            .getPublicUrl(safeName);
 
-        // Notify recipient via WebSocket
+        const publicURL = publicData.publicUrl;
+
+        console.log("Cloud upload success:", publicURL);
+        alert(`Uploaded to cloud storage: ${safeName}`);
+
         if (validUser && socket && socket.readyState === WebSocket.OPEN) {
             const sendTo = document.getElementById("sendTo").value;
+
             socket.send(JSON.stringify({
                 type: "chat",
                 to: sendTo,
-                text: `File: ${data.file} has been sent!`
+                text: `Cloud File: ${safeName}\n${publicURL}`
             }));
         }
 
     } catch (err) {
         console.error("Upload error:", err);
-        alert(err.message);
+        alert("Upload failed: " + err.message);
     }
 };
 
 OutButt.onclick = function () {
-    outInp = document.getElementById("chatBox").value;
-    sendTo = document.getElementById("sendTo").value;
+    const outInp = document.getElementById("chatBox").value;
+    const sendTo = document.getElementById("sendTo").value;
 
     if (validUser && socket && socket.readyState === WebSocket.OPEN) {
-
         socket.send(JSON.stringify({
             type: "chat",
             to: sendTo,
             text: outInp
         }));
 
-        document.getElementById("myText3").value = "";
+        document.getElementById("chatBox").value = "";
 
     } else {
         console.log("Not connected to WebSocket!");
     }
-}
+};
 
 LogoutButt.onclick = function () {
     if (validUser && socket && socket.readyState === WebSocket.OPEN) {
-        document.getElementById("head2").textContent = 'Signing Out'
-        socket.close(1000, 'Normal closure');
+        document.getElementById("head2").textContent = "Signing Out";
+        socket.close(1000, "Normal closure");
         Login.style.display = "block";
         Chat.style.display = "none";
     }
-}
+};
 
-// FTP download button
-function createDownloadButton(fileName) {
+function createCloudDownloadButton(fileName, url) {
     const container = document.getElementById("fileButtons");
 
-    // Create the button
     const btn = document.createElement("button");
     btn.textContent = `Download ${fileName}`;
     btn.style.margin = "5px";
 
-    // When clicked, download the file
-    btn.onclick = async function () {
-        try {
-            const res = await fetch(`https://${ipInp}:8443/download/${fileName}`, {
-                method: "GET",
-                headers: {
-                    "Authorization": `Sender ${TOKEN}`
-                }
-            });
-
-            if (!res.ok) throw new Error("Download failed");
-
-            const blob = await res.blob();
-            const url = window.URL.createObjectURL(blob);
-
-            const a = document.createElement("a");
-            a.href = url;
-            a.download = fileName;
-            a.click();
-
-            // Clean up
-            window.URL.revokeObjectURL(url);
-
-        } catch (err) {
-            console.error(err);
-            alert("Download failed: " + err.message);
-        }
+    btn.onclick = function () {
+        window.open(url, "_blank");
     };
 
     container.appendChild(btn);
 }
 
-//Shows logs of each user
 async function loadLogs() {
     const otherUser = document.getElementById("sendTo").value;
 
     try {
-        const res = await fetch(`https://${ipInp}:8443/logs/${usernameInp}_${otherUser}.txt`, {
+        const firstuser = usernameInp < otherUser ? usernameInp : otherUser;
+        const secuser = usernameInp < otherUser ? otherUser : usernameInp;
+
+        const res = await fetch(`https://${ipInp}:8443/logs/${firstuser}_${secuser}.txt`, {
             method: "GET"
         });
 
-        const data = await res.text();
+        const data = await res.json();
 
         if (!res.ok) throw new Error(data.error);
 
@@ -339,4 +365,8 @@ async function loadLogs() {
         console.error(err);
         alert("No logs found or failed to load");
     }
+}
+
+if (LoadLogsButt) {
+    LoadLogsButt.onclick = loadLogs;
 }

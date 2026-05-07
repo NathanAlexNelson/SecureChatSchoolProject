@@ -1,0 +1,52 @@
+*   d6ff1e8 (HEAD -> server, origin/server, origin/HEAD) Merge branch 'file-transfer' into server
+|\  
+| * 0cde300 (origin/file-transfer, file-transfer) Added a changelog.md file based on commit history
+* | f325571 server.exe completed
+* | 736a018 online users check & function implemented
+* | 608dfa0 bug fixes and security additions to ftp
+* | 705376e git merge
+|\| 
+| * cc49f39 Connected file transfer with UI and now when users send files it will be sent as a downloadble link
+| *   ad7ca7e Merge branch 'server' into file-transfer
+| |\  
+| * | 36b0637 Add initial file transfer backend and update gitignore
+| * | c11cb66 Add file transfer routes
+* | |   8f62bef log system completed
+|\ \ \  
+| | |/  
+| |/|   
+| * | fbb7c17 Add files via upload
+| * | 4f89600 Add files via upload
+| |/  
+* / 627c15d log system completed
+|/  
+| * e5598b1 (refs/stash) On server: temp package-lock before syncing server
+|/| 
+| * baa9392 index on server: 205d738 client-side encryption added, server sees cipher instead of plaintext, error handling, and bug fix on ws.js
+|/  
+* 205d738 client-side encryption added, server sees cipher instead of plaintext, error handling, and bug fix on ws.js
+* 9a73efa brute force handling
+* f86f20f user account system (registering & kicks hardcoding)
+* 235a079 Removed hardcoded username and password
+* 22feea2 finished prototype
+* f1ecb77 Add files via upload
+* 50e97c5 updated the web socket call
+* 6fe1191 adjusted the index file to have output on HTML
+* b25d0ef Frontend with websocket calls
+* 0de7552 i'm so sorry godfather franklin it wont happen again
+* 2d016e3 oopsies 2
+*   6f33805 oopsies
+|\  
+| * 59b53a6 Add files via upload
+* | dd9bd70 oopsies
+|/  
+| *   4c32d5e (origin/frontend) Merge pull request #2 from NathanAlexNelson/server
+| |\  
+| |/  
+|/|   
+* | cb7b8f0 added real-time messaging, reconnection ability, logging, and handling, good for integration
+* | f7b2d17 (origin/heartbeat-rate-limit, heartbeat-rate-limit) Add WebSocket heartbeat and per-IP rate limiting
+| * e1d2e67 Add files via upload
+|/  
+* c823f33 basic auth, token system for sessions, bcrypt for hash, verify users
+* 95eecfa server skeleton, TLS enabled, ws established, and can connect from client + server branch created

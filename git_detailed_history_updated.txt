@@ -1,0 +1,728 @@
+commit 79818fc591ef4bff2403666766af767111e52d4e
+Author: tylerhuynh4 <tylerhuynh92@csu.fullerton.edu>
+Date:   Wed May 6 23:35:56 2026 -0700
+
+    IV passthrough
+
+ server/source/ws.js | 4 +++-
+ 1 file changed, 3 insertions(+), 1 deletion(-)
+
+commit ddefa9e9fe5685e4a390a8276a71e6beda518526
+Author: tylerhuynh4 <123777323+tylerhuynh4@users.noreply.github.com>
+Date:   Wed May 6 23:24:29 2026 -0700
+
+    remove debug
+
+ server/source/log.js | 3 +--
+ 1 file changed, 1 insertion(+), 2 deletions(-)
+
+commit 62dd70d05452b96fe845b78a80e6d54fbe1404c9
+Author: tylerhuynh4 <tylerhuynh92@csu.fullerton.edu>
+Date:   Wed May 6 23:20:19 2026 -0700
+
+    honestly my fault
+
+ server/source/log.js | 6 +++---
+ 1 file changed, 3 insertions(+), 3 deletions(-)
+
+commit 3fdadc6e026095d52ae0fe87ea69b3f02dff8676
+Author: tylerhuynh4 <tylerhuynh92@csu.fullerton.edu>
+Date:   Wed May 6 23:18:46 2026 -0700
+
+    trying to debug
+
+ server/source/log.js | 1 +
+ 1 file changed, 1 insertion(+)
+
+commit e9294d0e32d21d71a94063436bf10d5cbaf29d3e
+Author: tylerhuynh4 <tylerhuynh92@csu.fullerton.edu>
+Date:   Wed May 6 23:15:38 2026 -0700
+
+    no sleep
+
+ server/source/log.js | 99 +++++++++++++++++++++++++++++++++++++---------------
+ 1 file changed, 70 insertions(+), 29 deletions(-)
+
+commit 5d839e953012dfb49e1a39cdf7150b314f8aac3f
+Author: tylerhuynh4 <tylerhuynh92@csu.fullerton.edu>
+Date:   Wed May 6 23:09:57 2026 -0700
+
+    msg and log storage encryption
+
+ server/source/ws.js | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+commit 60b02acc83a625833b5b7923e4b8ba58935ab9c1
+Author: tylerhuynh4 <tylerhuynh92@csu.fullerton.edu>
+Date:   Wed May 6 20:36:43 2026 -0700
+
+    moved DBs
+
+ server/source/users.js | 3 +--
+ 1 file changed, 1 insertion(+), 2 deletions(-)
+
+commit 507b620dcaf1255cf728cefac46775e79b12e633
+Author: tylerhuynh4 <tylerhuynh92@csu.fullerton.edu>
+Date:   Wed May 6 20:12:36 2026 -0700
+
+    why do i keep doing this to myself
+
+ server/source/users.js | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+commit 1e46c5fc092c36370285f5cf638e8ddc4b903a6a
+Author: tylerhuynh4 <tylerhuynh92@csu.fullerton.edu>
+Date:   Wed May 6 20:06:39 2026 -0700
+
+    found  it
+
+ server/package-lock.json | 142 +++++++++++++++++++++++++++++++++++++++++++++++
+ server/package.json      |   1 +
+ 2 files changed, 143 insertions(+)
+
+commit a1f5bb6a49264c664336f8ecadabd3f8575898b1
+Author: tylerhuynh4 <tylerhuynh92@csu.fullerton.edu>
+Date:   Wed May 6 19:52:19 2026 -0700
+
+    deployment issue w/ node modules
+
+ server/node_modules/ws/LICENSE                   |   20 -
+ server/node_modules/ws/README.md                 |  548 ---------
+ server/node_modules/ws/browser.js                |    8 -
+ server/node_modules/ws/index.js                  |   13 -
+ server/node_modules/ws/lib/buffer-util.js        |  131 --
+ server/node_modules/ws/lib/constants.js          |   19 -
+ server/node_modules/ws/lib/event-target.js       |  292 -----
+ server/node_modules/ws/lib/extension.js          |  203 ----
+ server/node_modules/ws/lib/limiter.js            |   55 -
+ server/node_modules/ws/lib/permessage-deflate.js |  528 --------
+ server/node_modules/ws/lib/receiver.js           |  706 -----------
+ server/node_modules/ws/lib/sender.js             |  602 ----------
+ server/node_modules/ws/lib/stream.js             |  161 ---
+ server/node_modules/ws/lib/subprotocol.js        |   62 -
+ server/node_modules/ws/lib/validation.js         |  152 ---
+ server/node_modules/ws/lib/websocket-server.js   |  554 ---------
+ server/node_modules/ws/lib/websocket.js          | 1393 ----------------------
+ server/node_modules/ws/package.json              |   69 --
+ server/node_modules/ws/wrapper.mjs               |    8 -
+ 19 files changed, 5524 deletions(-)
+
+commit 03631ba77cbdd5c79ae27b56f50362c00cc2acf0
+Author: tylerhuynh4 <tylerhuynh92@csu.fullerton.edu>
+Date:   Wed May 6 19:39:26 2026 -0700
+
+    syntax error
+
+ server/source/users.js | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+commit e7cb3d9cd8b3c07bd822307788b39a5a51970527
+Author: tylerhuynh4 <tylerhuynh92@csu.fullerton.edu>
+Date:   Wed May 6 19:34:27 2026 -0700
+
+    deploying backend
+
+ server/source/routes.js |  4 +--
+ server/source/users.js  | 68 ++++++++++++++++++++++++++++++++++++++-----------
+ 2 files changed, 55 insertions(+), 17 deletions(-)
+
+commit c08bfd62380465a8dc149a604696d0e0054ad9f7
+Author: tylerhuynh4 <tylerhuynh92@csu.fullerton.edu>
+Date:   Wed May 6 01:14:36 2026 -0700
+
+    bug fix on literal
+
+ server/source/ws.js | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+commit d5487da6fdc5c6466468d932a10fe241c24d195a
+Author: tylerhuynh4 <tylerhuynh92@csu.fullerton.edu>
+Date:   Tue May 5 23:33:14 2026 -0700
+
+    bug fixes and prep work for deployment
+
+ server/source/config.js |  2 +-
+ server/source/files.js  |  2 +-
+ server/source/log.js    | 10 +---------
+ server/source/server.js | 24 ++++++++++++++++++------
+ server/source/users.js  |  2 +-
+ server/source/ws.js     | 12 ++++++++++++
+ 6 files changed, 34 insertions(+), 18 deletions(-)
+
+commit 9ea950e6024134cce4c9eb4fdf6a0e1c97119364
+Author: tylerhuynh4 <tylerhuynh92@csu.fullerton.edu>
+Date:   Thu Apr 16 01:06:38 2026 -0700
+
+    hotfix? anyways the ftp shouldn't bug now
+
+ client/index.js | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+commit 3238a45cdf3f261fe25480e166638ec51d2c60d3
+Author: AlyaanMir45 <alyaanmir@csu.fullerton.edu>
+Date:   Sun Mar 22 23:46:49 2026 -0700
+
+    Client executable
+    
+    Files needed for the client executable
+
+ index.html        |   66 ++
+ index.js          |  342 +++++++++
+ main.js           |   23 +
+ package-lock.json | 2166 +++++++++++++++++++++++++++++++++++++++++++++++++++++
+ package.json      |   16 +
+ style.css         |   20 +
+ 6 files changed, 2633 insertions(+)
+
+commit d55abb7993bb4f2ebccf2eebc9136f0943407d1f
+Author: tylerhuynh4 <tylerhuynh92@csu.fullerton.edu>
+Date:   Sun Mar 22 23:21:43 2026 -0700
+
+    hotfix for files.js
+
+ server/server.exe      | Bin 38141374 -> 38138352 bytes
+ server/source/files.js |   5 +++--
+ 2 files changed, 3 insertions(+), 2 deletions(-)
+
+commit 78398e5bc5698508f6a0a90ec55468a1b9724de9
+Author: tylerhuynh4 <tylerhuynh92@csu.fullerton.edu>
+Date:   Sun Mar 22 20:09:38 2026 -0700
+
+    log reformatted (removed timestamp from fname)
+
+ server/server.exe    | Bin 38133876 -> 38141374 bytes
+ server/source/log.js |   2 +-
+ 2 files changed, 1 insertion(+), 1 deletion(-)
+
+commit 12fbb3b2b170474c79b4adb2b89d53439e099dbd
+Author: Nathan Nelson <Nathanalexnelson@gmail.com>
+Date:   Sun Mar 22 19:45:03 2026 -0700
+
+    Add files via upload
+    
+    client user management for the front end
+
+ client/index.js | 18 +++++++++++++++++-
+ 1 file changed, 17 insertions(+), 1 deletion(-)
+
+commit a4e58f83cabb8c5fe337e4ba7dcd987b842be542
+Author: Nathan Nelson <Nathanalexnelson@gmail.com>
+Date:   Sun Mar 22 18:56:54 2026 -0700
+
+    Delete style.css
+    
+    Duplicate File
+
+ style.css | 20 --------------------
+ 1 file changed, 20 deletions(-)
+
+commit ee9cb34f9c0f52cc9baf3387844cf426c740fe54
+Author: Nathan Nelson <Nathanalexnelson@gmail.com>
+Date:   Sun Mar 22 18:56:45 2026 -0700
+
+    Delete index.html
+    
+    Duplicate File
+
+ index.html | 59 -----------------------------------------------------------
+ 1 file changed, 59 deletions(-)
+
+commit 6e476975bb9776dbf23f3eb7a930c61e5b50586e
+Author: Nathan Nelson <Nathanalexnelson@gmail.com>
+Date:   Sun Mar 22 18:56:36 2026 -0700
+
+    Delete index.js
+    
+    Duplicate File
+
+ index.js | 194 ---------------------------------------------------------------
+ 1 file changed, 194 deletions(-)
+
+commit 1f82090b064090505d3589c54e3c44724c530f5a
+Author: Nathan Nelson <Nathanalexnelson@gmail.com>
+Date:   Sun Mar 22 18:55:03 2026 -0700
+
+    Add files via upload
+    
+    Updated login to call registered users and added chat log
+
+ client/index.js | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+commit 72fc61cd545799553e9625b7fd99093e5d877523
+Author: tylerhuynh4 <tylerhuynh92@csu.fullerton.edu>
+Date:   Sun Mar 22 18:39:27 2026 -0700
+
+    pathing issue fixed
+
+ server/server.exe      | Bin 38133883 -> 38133876 bytes
+ server/source/files.js |   2 +-
+ server/source/log.js   |   2 +-
+ server/source/users.js |   2 +-
+ 4 files changed, 3 insertions(+), 3 deletions(-)
+
+commit 10eca306ebe54229196e04051b0339ce7c7efad7
+Author: Nathan Nelson <Nathanalexnelson@gmail.com>
+Date:   Sun Mar 22 17:09:35 2026 -0700
+
+    Add files via upload
+
+ client/index.html |  10 ++--
+ client/index.js   | 152 +++++++++++++++++++++++++++++-------------------------
+ 2 files changed, 89 insertions(+), 73 deletions(-)
+
+commit 4c70e731c1d344881bf609129d60d3b7c8941b03
+Author: tylerhuynh4 <tylerhuynh92@csu.fullerton.edu>
+Date:   Sat Mar 21 21:26:36 2026 -0700
+
+    fixed directory issues, bug fixes again, and updated ignore
+
+ .gitignore             |   7 +++++++
+ server/.gitignore      |   8 --------
+ server/server.exe      | Bin 38146348 -> 38133883 bytes
+ server/source/files.js |   4 ++--
+ server/source/ws.js    |   2 +-
+ 5 files changed, 10 insertions(+), 11 deletions(-)
+
+commit fd902d123c5bcd4a4870a8cc2bcf2423a03ff48f
+Author: tylerhuynh4 <tylerhuynh92@csu.fullerton.edu>
+Date:   Sat Mar 21 20:16:06 2026 -0700
+
+    forgot to include the certs folder for build lmfao
+
+ server/certs/.gitkeep | 0
+ 1 file changed, 0 insertions(+), 0 deletions(-)
+
+commit c05e2f2200b2d50fa132c8133b139e4aa7486a1c
+Merge: 52fe276 5e3d704
+Author: tylerhuynh4 <tylerhuynh92@csu.fullerton.edu>
+Date:   Sat Mar 21 20:03:38 2026 -0700
+
+    Merge branch 'server' of https://github.com/NathanAlexNelson/SecureChatSchoolProject into server
+
+commit 52fe2768070224a760ddb605a163bb6db22c218b
+Author: tylerhuynh4 <tylerhuynh92@csu.fullerton.edu>
+Date:   Sat Mar 21 20:01:08 2026 -0700
+
+    fixed file transfer path traversal and rebuilt server.exe
+
+ server/server.exe      | Bin 38141789 -> 38146348 bytes
+ server/source/files.js |   2 +-
+ 2 files changed, 1 insertion(+), 1 deletion(-)
+
+commit 5e3d704595d3820709fcd6e689a9e7344bf13c51
+Author: Nathan Nelson <Nathanalexnelson@gmail.com>
+Date:   Sat Mar 21 02:37:54 2026 -0700
+
+    Add files via upload
+    
+    Added registration and FTP calls in front end
+
+ client/index.html |  6 +++-
+ client/index.js   | 94 +++++++++++++++++++++++++++++++++++++++++++++++++++++--
+ 2 files changed, 96 insertions(+), 4 deletions(-)
+
+commit 305af82fe89a822637856b1fcd3c4a4c800c0366
+Author: Nathan Nelson <Nathanalexnelson@gmail.com>
+Date:   Sat Mar 21 02:13:24 2026 -0700
+
+    Add files via upload
+
+ client/index.html |  4 ++--
+ client/index.js   | 17 ++++++++++++++---
+ 2 files changed, 16 insertions(+), 5 deletions(-)
+
+commit d6ff1e840825771429eb9208453441c6a7f752e5
+Merge: f325571 0cde300
+Author: AlyaanMir45 <alyaanmir@csu.fullerton.edu>
+Date:   Fri Mar 20 21:52:45 2026 -0700
+
+    Merge branch 'file-transfer' into server
+
+commit 0cde300bbc28787eb2ff99a9a322601dbc218629
+Author: AlyaanMir45 <alyaanmir@csu.fullerton.edu>
+Date:   Fri Mar 20 21:50:57 2026 -0700
+
+    Added a changelog.md file based on commit history
+
+ CHANGELOG.md | 64 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ 1 file changed, 64 insertions(+)
+
+commit f325571258313092e5df6acef02ed71b101ceccd
+Author: tylerhuynh4 <tylerhuynh92@csu.fullerton.edu>
+Date:   Fri Mar 20 20:19:08 2026 -0700
+
+    server.exe completed
+
+ server/package-lock.json |  41 +++++++++--------------------------------
+ server/package.json      |  11 +++++++++--
+ server/server.exe        | Bin 0 -> 38141789 bytes
+ server/source/files.js   |   3 ++-
+ server/source/log.js     |   3 ++-
+ server/source/users.js   |   5 +++--
+ 6 files changed, 25 insertions(+), 38 deletions(-)
+
+commit 736a018f3da0878197ee8b2d4d7bb2c7134d807c
+Author: tylerhuynh4 <tylerhuynh92@csu.fullerton.edu>
+Date:   Fri Mar 20 18:03:21 2026 -0700
+
+    online users check & function implemented
+
+ server/source/routes.js | 7 +++++++
+ server/source/ws.js     | 8 ++++++--
+ 2 files changed, 13 insertions(+), 2 deletions(-)
+
+commit 608dfa0127ebae13f424d4160a483a57ef71dfa7
+Author: tylerhuynh4 <tylerhuynh92@csu.fullerton.edu>
+Date:   Fri Mar 20 16:25:00 2026 -0700
+
+    bug fixes and security additions to ftp
+
+ server/.gitignore      |  2 +-
+ server/source/files.js | 16 ++++++++++++++++
+ server/source/ws.js    |  1 +
+ 3 files changed, 18 insertions(+), 1 deletion(-)
+
+commit 705376eb56b7a858c4ca4a626826d761a2aad558
+Merge: 8f62bef cc49f39
+Author: tylerhuynh4 <tylerhuynh92@csu.fullerton.edu>
+Date:   Fri Mar 20 13:17:46 2026 -0700
+
+    git merge
+
+commit 8f62bef393220412a56dd748b01e8676ddfaf2af
+Merge: 627c15d fbb7c17
+Author: tylerhuynh4 <tylerhuynh92@csu.fullerton.edu>
+Date:   Fri Mar 20 12:27:46 2026 -0700
+
+    log system completed
+
+commit 627c15d75f06533247240eb90f6538a2be93a311
+Author: tylerhuynh4 <tylerhuynh92@csu.fullerton.edu>
+Date:   Fri Mar 20 12:26:46 2026 -0700
+
+    log system completed
+
+ server/.gitignore    |  4 ++-
+ server/source/log.js | 70 ++++++++++++++++++++++++++++++++++++++++++++++++++++
+ server/source/ws.js  |  7 ++++++
+ 3 files changed, 80 insertions(+), 1 deletion(-)
+
+commit cc49f393698288164fc9393bedf8d5edb111c610
+Author: AlyaanMir45 <alyaanmir@csu.fullerton.edu>
+Date:   Fri Mar 20 02:34:32 2026 -0700
+
+    Connected file transfer with UI and now when users send files it will be sent as a downloadble link
+
+ index.html |  26 +++++++----
+ index.js   | 146 +++++++++++++++++++++++++++++++++++++++++++++----------------
+ 2 files changed, 126 insertions(+), 46 deletions(-)
+
+commit ad7ca7ea2002b6bf9a742c3a7a44350ac3bfd8ad
+Merge: 36b0637 fbb7c17
+Author: AlyaanMir45 <alyaanmir@csu.fullerton.edu>
+Date:   Fri Mar 20 01:09:28 2026 -0700
+
+    Merge branch 'server' into file-transfer
+
+commit e5598b1ae52ef46a2e7198af82c98d178c276a83
+Merge: 205d738 baa9392
+Author: AlyaanMir45 <alyaanmir@csu.fullerton.edu>
+Date:   Fri Mar 20 01:09:02 2026 -0700
+
+    On server: temp package-lock before syncing server
+
+commit baa9392cd08415c285e7593c8ba94e2fb027aa35
+Author: AlyaanMir45 <alyaanmir@csu.fullerton.edu>
+Date:   Fri Mar 20 01:09:02 2026 -0700
+
+    index on server: 205d738 client-side encryption added, server sees cipher instead of plaintext, error handling, and bug fix on ws.js
+
+commit fbb7c170eec6702edd218362a1f425e2ab77512e
+Author: Nathan Nelson <Nathanalexnelson@gmail.com>
+Date:   Thu Mar 19 07:41:27 2026 -0700
+
+    Add files via upload
+    
+    Updated with registration button
+
+ client/index.html |  1 +
+ client/index.js   | 59 ++++++++++++++++++++++++++++++++++++++++++++++++-------
+ 2 files changed, 53 insertions(+), 7 deletions(-)
+
+commit 4f8960060da38985d521903da3710f45551167c3
+Author: Nathan Nelson <Nathanalexnelson@gmail.com>
+Date:   Thu Mar 19 06:54:26 2026 -0700
+
+    Add files via upload
+    
+    Updated Client HTML
+
+ client/index.html |  59 +++++++++++++++++++
+ client/index.js   | 168 ++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ client/style.css  |  20 +++++++
+ 3 files changed, 247 insertions(+)
+
+commit 36b063735eaece7dbb76f37438f32bc4e018be67
+Author: AlyaanMir45 <alyaanmir@csu.fullerton.edu>
+Date:   Tue Mar 17 15:55:01 2026 -0700
+
+    Add initial file transfer backend and update gitignore
+
+ server/.gitignore      |  3 ++-
+ server/source/files.js | 55 ++++++++++++++++++++++++++++++++++++++++++++++++++
+ 2 files changed, 57 insertions(+), 1 deletion(-)
+
+commit c11cb6636074f8a12718a60a4561212b9f524c72
+Author: AlyaanMir45 <alyaanmir@csu.fullerton.edu>
+Date:   Tue Mar 17 15:52:19 2026 -0700
+
+    Add file transfer routes
+
+ server/source/routes.js | 12 ++++++++++++
+ 1 file changed, 12 insertions(+)
+
+commit 205d738c41f0089abb17f6c0bddc9877ce43e475
+Author: tylerhuynh4 <tylerhuynh92@csu.fullerton.edu>
+Date:   Sun Mar 15 01:03:37 2026 -0700
+
+    client-side encryption added, server sees cipher instead of plaintext, error handling, and bug fix on ws.js
+
+ server/source/brutes.js |  2 +-
+ server/source/crypt.js  | 20 ++++++++++++++++
+ server/source/ws.js     | 62 ++++++++++++++++++++++++++++++++++++++++++-------
+ 3 files changed, 75 insertions(+), 9 deletions(-)
+
+commit 9a73efa9ba10afc579743a5f3d81a5c312813624
+Author: tylerhuynh4 <tylerhuynh92@csu.fullerton.edu>
+Date:   Thu Mar 12 19:24:40 2026 -0700
+
+    brute force handling
+
+ server/source/auth.js   | 18 +++++++++-
+ server/source/brutes.js | 92 +++++++++++++++++++++++++++++++++++++++++++++++++
+ 2 files changed, 109 insertions(+), 1 deletion(-)
+
+commit f86f20f417f193cdbf0b3e4abca6c7f64227dd13
+Author: tylerhuynh4 <tylerhuynh92@csu.fullerton.edu>
+Date:   Thu Mar 12 04:32:29 2026 -0700
+
+    user account system (registering & kicks hardcoding)
+
+ server/.gitignore       |  3 +-
+ server/data/.gitkeep    |  0
+ server/source/auth.js   | 30 +++++++++++++++--
+ server/source/routes.js | 19 +++++++++--
+ server/source/users.js  | 90 ++++++++++++++++++++++++++++++++++++++-----------
+ 5 files changed, 116 insertions(+), 26 deletions(-)
+
+commit 235a0795e0523f2493757c7721b8bcee78698806
+Author: Nathan Nelson <Nathanalexnelson@gmail.com>
+Date:   Fri Feb 13 09:20:34 2026 -0800
+
+    Removed hardcoded username and password
+    
+    Removed Username and Password from Frontend due to Security Concers
+
+ index.js | 38 +++++++-------------------------------
+ 1 file changed, 7 insertions(+), 31 deletions(-)
+
+commit 22feea2f03ea2328f3f34608a24b1aa1eeba99eb
+Author: tylerhuynh4 <tylerhuynh92@csu.fullerton.edu>
+Date:   Fri Feb 13 02:38:24 2026 -0800
+
+    finished prototype
+
+ server/.gitignore                      |  1 +
+ server/node_modules/.package-lock.json | 29 -----------------------
+ server/package-lock.json               | 43 +++++++++++++++++++++++++++++++---
+ server/package.json                    | 11 ++++++---
+ 4 files changed, 49 insertions(+), 35 deletions(-)
+
+commit f1ecb774967fb50bae2d8bf42b16dbc510130f2c
+Author: tylerhuynh4 <123777323+tylerhuynh4@users.noreply.github.com>
+Date:   Thu Feb 12 21:36:05 2026 -0800
+
+    Add files via upload
+    
+    fixed web socket integration - nathan
+
+ index.js | 60 ++++++++++++++++++++++--------------------------------------
+ 1 file changed, 22 insertions(+), 38 deletions(-)
+
+commit 50e97c57119745ef125ee5be2e26d9543fb8f51a
+Author: Nathan Nelson <Nathanalexnelson@gmail.com>
+Date:   Thu Feb 12 19:55:05 2026 -0800
+
+    updated the web socket call
+    
+    updated the web socket call
+
+ index.js | 38 +++++++++++++++++++++++++-------------
+ 1 file changed, 25 insertions(+), 13 deletions(-)
+
+commit 6fe11910685095e1c3878d8b097de8b77e4c326b
+Author: Nathan Nelson <Nathanalexnelson@gmail.com>
+Date:   Wed Feb 11 20:52:46 2026 -0800
+
+    adjusted the index file to have output on HTML
+    
+    adjusted the index file to have output on HTML
+
+ index.html | 8 +++++---
+ index.js   | 9 +++++++++
+ 2 files changed, 14 insertions(+), 3 deletions(-)
+
+commit b25d0eff8fa86cbb98b6898ba4f625a1575f31b3
+Author: Nathan Nelson <Nathanalexnelson@gmail.com>
+Date:   Wed Feb 11 20:24:37 2026 -0800
+
+    Frontend with websocket calls
+    
+    Websocket calls that validate input
+
+ index.html |   7 ++++
+ index.js   | 122 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++-----
+ 2 files changed, 119 insertions(+), 10 deletions(-)
+
+commit 0de7552bc2333b6c83a6c76490c898a80239a6c6
+Author: tylerhuynh4 <tylerhuynh92@csu.fullerton.edu>
+Date:   Wed Feb 11 02:13:48 2026 -0800
+
+    i'm so sorry godfather franklin it wont happen again
+
+ server/.gitignore | 3 +++
+ 1 file changed, 3 insertions(+)
+
+commit 2d016e3412fe110aebb9a8c9da9e0ba99d773e2c
+Author: tylerhuynh4 <tylerhuynh92@csu.fullerton.edu>
+Date:   Wed Feb 11 02:06:23 2026 -0800
+
+    oopsies 2
+
+ server/.gitignore/certs/server-cert.pem | 25 -------------------------
+ server/.gitignore/certs/server-key.pem  | 28 ----------------------------
+ 2 files changed, 53 deletions(-)
+
+commit 6f33805789fc74e3ba17f6c8a2d2b20cf7f70fc9
+Merge: dd9bd70 59b53a6
+Author: tylerhuynh4 <tylerhuynh92@csu.fullerton.edu>
+Date:   Wed Feb 11 01:51:20 2026 -0800
+
+    oopsies
+
+commit dd9bd701546ea69de171fca2bcd4fc760faad4cd
+Author: tylerhuynh4 <tylerhuynh92@csu.fullerton.edu>
+Date:   Wed Feb 11 01:49:51 2026 -0800
+
+    oopsies
+
+ server/{ => .gitignore}/certs/server-cert.pem | 0
+ server/{ => .gitignore}/certs/server-key.pem  | 0
+ 2 files changed, 0 insertions(+), 0 deletions(-)
+
+commit 59b53a605ac88b4dc85aa30fba1025914c6e5ced
+Author: Nathan Nelson <Nathanalexnelson@gmail.com>
+Date:   Tue Feb 10 15:38:23 2026 -0800
+
+    Add files via upload
+    
+    Front end files that are not directly attached
+    I did the logic handling in html and the js file and now will just need to call the commands from the server
+
+ index.html | 40 ++++++++++++++++++++++++++++++++++++++++
+ index.js   | 41 +++++++++++++++++++++++++++++++++++++++++
+ style.css  | 20 ++++++++++++++++++++
+ 3 files changed, 101 insertions(+)
+
+commit 4c32d5e2751096ad9f54fda3af9c1d64b2f38b61
+Merge: e1d2e67 cb7b8f0
+Author: Nathan Nelson <Nathanalexnelson@gmail.com>
+Date:   Tue Feb 10 12:31:19 2026 -0800
+
+    Merge pull request #2 from NathanAlexNelson/server
+    
+    Merging frontend to server
+
+commit cb7b8f0c60a2c4bd963b6ab4ce04c4b44a3bd135
+Author: tylerhuynh4 <tylerhuynh92@csu.fullerton.edu>
+Date:   Tue Feb 10 00:22:12 2026 -0800
+
+    added real-time messaging, reconnection ability, logging, and handling, good for integration
+
+ server/source/ws.js | 143 ++++++++++++++++++++++++++++++++++++++++++++++------
+ 1 file changed, 127 insertions(+), 16 deletions(-)
+
+commit e1d2e6787563a4e5cb156db2b733467ea29f4b13
+Author: Nathan Nelson <Nathanalexnelson@gmail.com>
+Date:   Tue Feb 10 00:04:54 2026 -0800
+
+    Add files via upload
+    
+    Basic front end, not currently connected to web socket as awaiting final version from Tyler
+
+ index.html | 27 +++++++++++++++++++++++++++
+ index.js   | 12 ++++++++++++
+ style.css  | 20 ++++++++++++++++++++
+ 3 files changed, 59 insertions(+)
+
+commit f7b2d1738057428fda758f1e878239feb7c0119e
+Author: AlyaanMir45 <alyaanmir@csu.fullerton.edu>
+Date:   Mon Feb 9 14:49:42 2026 -0800
+
+    Add WebSocket heartbeat and per-IP rate limiting
+
+ server/source/server.js | 14 +++++++++
+ server/source/ws.js     | 79 ++++++++++++++++++++++++++++++++++++++++++-------
+ 2 files changed, 82 insertions(+), 11 deletions(-)
+
+commit c823f33d9b03002dda85f49e3adcfa5c842fb37d
+Author: tylerhuynh4 <tylerhuynh92@csu.fullerton.edu>
+Date:   Sun Feb 8 22:03:55 2026 -0800
+
+    basic auth, token system for sessions, bcrypt for hash, verify users
+
+ server/package-lock.json  |  4 ++--
+ server/package.json       |  2 +-
+ server/source/auth.js     | 61 +++++++++++++++++++++++++++++++++++++++++++++++
+ server/source/routes.js   |  8 +++++++
+ server/source/sessions.js | 25 +++++++++++++++++++
+ server/source/users.js    | 32 +++++++++++++++++++++++++
+ server/source/ws.js       | 23 +++++++++++++++++-
+ 7 files changed, 151 insertions(+), 4 deletions(-)
+
+commit 95eecfa578f01f158cd725f19a5a8a4cf5113a31
+Author: tylerhuynh4 <tylerhuynh92@csu.fullerton.edu>
+Date:   Sun Feb 8 03:18:52 2026 -0800
+
+    server skeleton, TLS enabled, ws established, and can connect from client + server branch created
+
+ server/certs/server-cert.pem                     |   25 +
+ server/certs/server-key.pem                      |   28 +
+ server/node_modules/.package-lock.json           |   29 +
+ server/node_modules/ws/LICENSE                   |   20 +
+ server/node_modules/ws/README.md                 |  548 +++++++++
+ server/node_modules/ws/browser.js                |    8 +
+ server/node_modules/ws/index.js                  |   13 +
+ server/node_modules/ws/lib/buffer-util.js        |  131 ++
+ server/node_modules/ws/lib/constants.js          |   19 +
+ server/node_modules/ws/lib/event-target.js       |  292 +++++
+ server/node_modules/ws/lib/extension.js          |  203 ++++
+ server/node_modules/ws/lib/limiter.js            |   55 +
+ server/node_modules/ws/lib/permessage-deflate.js |  528 ++++++++
+ server/node_modules/ws/lib/receiver.js           |  706 +++++++++++
+ server/node_modules/ws/lib/sender.js             |  602 ++++++++++
+ server/node_modules/ws/lib/stream.js             |  161 +++
+ server/node_modules/ws/lib/subprotocol.js        |   62 +
+ server/node_modules/ws/lib/validation.js         |  152 +++
+ server/node_modules/ws/lib/websocket-server.js   |  554 +++++++++
+ server/node_modules/ws/lib/websocket.js          | 1393 ++++++++++++++++++++++
+ server/node_modules/ws/package.json              |   69 ++
+ server/node_modules/ws/wrapper.mjs               |    8 +
+ server/package-lock.json                         |   36 +
+ server/package.json                              |   12 +
+ server/source/config.js                          |    6 +
+ server/source/routes.js                          |   23 +
+ server/source/server.js                          |   23 +
+ server/source/ws.js                              |   15 +
+ 28 files changed, 5721 insertions(+)

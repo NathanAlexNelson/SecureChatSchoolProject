@@ -1,46 +1,83 @@
+import { createClient } from 'https://esm.sh/@supabase/supabase-js'
+
+const SUPABASE_URL = 'https://lvakoxjxljptsbwdwjly.supabase.co'
+const SUPABASE_ANON_KEY = 'sb_publishable_3VSIHvfenIlg1dWugzdMFw_E4Li81YG'
+
+const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+
 document.getElementById("head1").textContent = "SecureTech Chat Client";
 document.getElementById("para1").textContent = "CPSC 455 - Michael Franklin";
 document.getElementById("para2").textContent = "By: Alyaan Mir - Nathan Nelson - Tyler Huynh";
 
-let pendingMessages = {};
 let users = [];
 let usernameInp;
 let passwordInp;
-let serverIP;
-let pendingKeyRequests = new Set();
-
 let validUser = false;
 
 var socket;
 let TOKEN;
 
-let ipInp = `securechatschoolproject.onrender.com`;
+let ipInp;
+let validIP = false;
 
-//Keys for E2E encryption shared is an array to allow multiple keys be shared
-let keyPair;
-let sharedKeys = {};
-
-const RegButt = document.getElementById("RegButt");
 const LogButt = document.getElementById("LogButt");
+const RegButt = document.getElementById("RegButt");
 const OutButt = document.getElementById("OutButt");
 const FTPButt = document.getElementById("FTPButt");
 const LogoutButt = document.getElementById("LogoutButt");
+const LoadLogsButt = document.getElementById("LoadLogsButt");
 
 const Login = document.getElementById("Login");
 const Chat = document.getElementById("Chat");
 
-const peerPublicKeys = {};
+function validateFileBeforeUpload(file) {
+    const maxSize = 25 * 1024 * 1024;
 
-// Add a user to the list and update dropdown
+    const blockedExtensions = [
+        ".exe", ".bat", ".cmd", ".sh", ".dll",
+        ".msi", ".ps1", ".vbs", ".scr"
+    ];
+
+    const allowedTypes = [
+        "image/png",
+        "image/jpeg",
+        "image/gif",
+        "application/pdf",
+        "text/plain",
+        "application/zip",
+        "video/mp4"
+    ];
+
+    const lowerName = file.name.toLowerCase();
+
+    if (file.size > maxSize) return "File exceeds 25MB limit";
+
+    if (blockedExtensions.some(ext => lowerName.endsWith(ext))) {
+        return "Blocked potentially dangerous file type";
+    }
+
+    if (!allowedTypes.includes(file.type)) return "Unsupported file type";
+
+    if (
+        file.name.includes("/") ||
+        file.name.includes("\\") ||
+        file.name.includes("..")
+    ) {
+        return "Invalid filename";
+    }
+
+    return null;
+}
+
 function addUserToDropdown(user) {
-    if (user === usernameInp) return; // Prevent adding self
+    if (user === usernameInp) return;
+
     if (!users.includes(user)) {
         users.push(user);
         updateUserDropdown(users);
     }
 }
 
-// Remove a user from the list and update dropdown
 function removeUserFromDropdown(user) {
     users = users.filter(u => u !== user);
     updateUserDropdown(users);
@@ -48,12 +85,10 @@ function removeUserFromDropdown(user) {
 
 function updateUserDropdown(users) {
     const select = document.getElementById("sendTo");
-
-    // Clear old list
     select.innerHTML = "";
 
     users.forEach(user => {
-        if (user === usernameInp) return; //Prevents user from messaging themself
+        if (user === usernameInp) return;
 
         const option = document.createElement("option");
         option.value = user;
@@ -62,35 +97,27 @@ function updateUserDropdown(users) {
     });
 }
 
-//This is the button that should call to websocket
-LogButt.onclick = async function(){
+LogButt.onclick = async function () {
     usernameInp = document.getElementById("usernameBox").value.toLowerCase();
     passwordInp = document.getElementById("passwordBox").value;
-    
-    if (!keyPair) {
-        keyPair = await generateKeyPair();
-    }
-    const pubKey = await exportPublicKey();
-    
+    ipInp = document.getElementById("ipInp").value;
+
     validateFunc(usernameInp);
-    
-    if (!validUser) return;
+    validateIP(ipInp);
+
+    if (!validUser || !validIP) return;
 
     try {
-        const res = await fetch(`https://${ipInp}/login`, {
+        const res = await fetch(`https://${ipInp}:8443/login`, {
             method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
+            headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
                 username: usernameInp,
-                password: passwordInp,
+                password: passwordInp
             })
         });
 
         const data = await res.json();
-
-        console.log("Login response:", data);
 
         if (!res.ok) {
             throw new Error(data.error || "Login failed");
@@ -98,110 +125,33 @@ LogButt.onclick = async function(){
 
         TOKEN = data.token;
 
-        // Create WebSocket
-        socket = new WebSocket(`wss://${ipInp}?token=${TOKEN}`);
+        socket = new WebSocket(`wss://${ipInp}:8443?token=${TOKEN}`);
 
-        socket.onopen = async function () {
+        socket.onopen = function () {
             console.log("WebSocket connected!");
-            
-            socket.send(JSON.stringify({
-                type: "pubk_register",
-                pubk: pubKey
-            }));
-
             document.getElementById("head2").textContent = `Connected as ${usernameInp}`;
             Login.style.display = "none";
             Chat.style.display = "block";
         };
 
-        socket.onmessage = async function (event) {
+        socket.onmessage = function (event) {
             const data = JSON.parse(event.data);
 
             console.log("Received from server:", data);
-            if (data.type === "pubk_response") {
-                peerPublicKeys[data.username] = await importPublicKey(data.pubk);
 
-                if (keyPair?.privateKey && peerPublicKeys[data.username]) {
-                    await getSharedKey(data.username);
-                }
-
-                flushQueue(data.username);
-
-                document.getElementById("head2").textContent = "Public Key Acquired!"
-            }
-
-            if (data.type === "file") {
-
-                const key = await getSharedKey(data.from);
-                if (!key) return;
-
-                if (!data.text || !data.iv || !data.filename) {
-                    console.warn("Invalid file payload:", data);
-                    return;
-                }
-
-                if (!isBase64(data.text) || !isBase64(data.iv)) {
-                    console.error("Corrupted file encryption payload:", data);
-                    return;
-                }
-
-                const fileBuffer = await decryptFile(key, data.text, data.iv);
-
-                const blob = new Blob([fileBuffer], { type: data.mimeType });
-                const url = URL.createObjectURL(blob);
-
-                const a = document.createElement("a");
-                a.href = url;
-                a.download = data.filename;
-                a.click();
-
-                URL.revokeObjectURL(url);
-            }
-            
             if (data.type === "chat") {
-
-                const key = await getSharedKey(data.from);
-
-                // 1. Must have encrypted payload
-                if (!data.text || !data.iv) {
-                    console.warn("Incomplete chat message (queued or corrupted):", data);
-                    return;
-                }
-
-                // 2. Must be valid Base64 BEFORE decrypt
-                if (!isBase64(data.text) || !isBase64(data.iv)) {
-                    console.error("Invalid Base64 chat payload:", data);
-                    return;
-                }
-
-                if (!key) {
-                    console.warn("Key not ready yet. Queueing message.");
-
-                    setTimeout(async () => {
-                        const retryKey = await getSharedKey(data.from);
-                        if (!retryKey) return;
-
-                        const decrypted = await decryptMessage(
-                            retryKey,
-                            data.text,
-                            data.iv
-                        );
-
-                        document.getElementById("head2").textContent =
-                            `${data.from}: ${decrypted}`;
-                    }, 300);
-
-                    return;
-                }
-
-                const decrypted = await decryptMessage(
-                    key,
-                    data.text,
-                    data.iv
-                );
-
                 document.getElementById("head2").textContent =
-                    `${data.from}: ${decrypted}`;
+                    `${data.from}: ${data.text}`;
+
+                if (data.text.includes("Cloud File:")) {
+                    const lines = data.text.split("\n");
+                    const label = lines[0];
+                    const url = lines[1];
+
+                    const fileName = label.replace("Cloud File: ", "");
+
+                    createCloudDownloadButton(fileName, url);
+                }
             }
 
             if (data.type === "system" && data.event === "connected") {
@@ -230,48 +180,22 @@ LogButt.onclick = async function(){
         alert(err.message);
         document.getElementById("head2").textContent = "Login Failed";
     }
-}
+};
 
-async function encryptFile(sharedKey, file) {
-    const iv = crypto.getRandomValues(new Uint8Array(12));
-    const fileBuffer = await file.arrayBuffer();
-
-    const ciphertext = await crypto.subtle.encrypt(
-        {
-            name: "AES-GCM",
-            iv: iv,
-        },
-        sharedKey,
-        fileBuffer
-    );
-
-    return {
-        ciphertext: arrayBufferToBase64(ciphertext),
-        iv: arrayBufferToBase64(iv),
-        filename: file.name,
-        mimeType: file.type
-    };
-}
-
-function isBase64(str) {
-    return typeof str === "string" &&
-        /^[A-Za-z0-9+/=]+$/.test(str.trim());
-}
-
-//Register button uses same input as login
-RegButt.onclick = async function(){
+RegButt.onclick = async function () {
     usernameInp = document.getElementById("usernameBox").value.toLowerCase();
     passwordInp = document.getElementById("passwordBox").value;
+    ipInp = document.getElementById("ipInp").value;
+
     validateFunc(usernameInp);
-    
-    if (!validUser) return;
+    validateIP(ipInp);
+
+    if (!validUser || !validIP) return;
 
     try {
-        const res = await fetch(`https://${ipInp}/register`, {
+        const res = await fetch(`https://${ipInp}:8443/register`, {
             method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
+            headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
                 username: usernameInp,
                 password: passwordInp
@@ -280,11 +204,9 @@ RegButt.onclick = async function(){
 
         const data = await res.json();
 
-        if (!res.ok) {
+        if (!res.ok || !data.ok) {
             throw new Error(data.error || "Registration failed");
         }
-
-        console.log("Register response:", data);
 
         alert("Account created successfully!");
         document.getElementById("head2").textContent = `Registered as ${usernameInp}`;
@@ -292,26 +214,29 @@ RegButt.onclick = async function(){
     } catch (err) {
         console.error("Register failed:", err);
         alert(err.message);
-        document.getElementById("head2").textContent = 'Registration Failed';
+        document.getElementById("head2").textContent = "Registration Failed";
     }
-}
+};
 
-// Function to validate alphanumeric input does not check username that is done at server launch in backend
 function validateFunc(inputCheck) {
-    let val = inputCheck.trim(); 
-    let RegEx = /^[a-z0-9.]+$/i; 
-    let Valid = RegEx.test(val);
-    
-    if (Valid) {
-        validUser = true;
-    }
-    else {
-        console.log("Invalid credentials");
-        validUser = false;
+    let val = inputCheck.trim();
+    let RegEx = /^[a-z0-9.]+$/i;
+    validUser = RegEx.test(val);
+
+    if (!validUser) {
+        alert("Invalid username. Use letters, numbers, or dots only.");
     }
 }
 
-// Validates numbers and dots for IP
+function validateIP(inputCheck) {
+    let val = inputCheck.trim();
+    let RegEx = /^[0-9.]+$/i;
+    validIP = RegEx.test(val);
+
+    if (!validIP) {
+        alert("Invalid IP address.");
+    }
+}
 
 FTPButt.onclick = async function () {
     const fileInput = document.getElementById("fileInput");
@@ -322,277 +247,121 @@ FTPButt.onclick = async function () {
         return;
     }
 
-    const sendTo = document.getElementById("sendTo").value;
+    const validationError = validateFileBeforeUpload(file);
 
-    try {
-
-        const key = await getSharedKey(sendTo);
-
-        if (!key) {
-            console.warn("File key not ready yet");
-            return;
-        }
-
-        const enc = await encryptFile(key, file);
-
-        socket.send(JSON.stringify({
-            type: "file",
-            from: usernameInp,
-            to: sendTo,
-            filename: enc.filename,
-            mimeType: enc.mimeType,
-            text: enc.ciphertext,
-            iv: enc.iv
-        }));
-
-        alert(`Encrypted file sent: ${file.name}`);
-
-    } catch (err) {
-        console.error("Upload error:", err);
-        alert(err.message);
-    }
-};
-
-//E2E encyrption using ECDH
-function generateKeyPair() {
-  return crypto.subtle.generateKey(
-    {
-      name: "ECDH",
-      namedCurve: "P-256",
-    },
-    true,
-    ["deriveKey"]
-  );
-}
-
-async function decryptFile(sharedKey, ciphertext, iv) {
-    const decrypted = await crypto.subtle.decrypt(
-        {
-            name: "AES-GCM",
-            iv: base64ToArrayBuffer(iv),
-        },
-        sharedKey,
-        base64ToArrayBuffer(ciphertext)
-    );
-
-    return decrypted; // ArrayBuffer
-}
-
-async function exportPublicKey() {
-  const raw = await crypto.subtle.exportKey("raw", keyPair.publicKey);
-  return arrayBufferToBase64(raw);
-}
-
-async function importPublicKey(base64Key) {
-  const raw = base64ToArrayBuffer(base64Key);
-
-  return crypto.subtle.importKey(
-    "raw",
-    raw,
-    {
-      name: "ECDH",
-      namedCurve: "P-256",
-    },
-    false,
-    []
-  );
-}
-
-async function getSharedKey(peerId) {
-    if (sharedKeys[peerId]) return sharedKeys[peerId];
-
-    const peerPublicKey = peerPublicKeys[peerId];
-
-    if (!peerPublicKey) {
-        if (!pendingKeyRequests.has(peerId)) {
-            pendingKeyRequests.add(peerId);
-
-            socket.send(JSON.stringify({
-                type: "pubk_request",
-                username: peerId
-            }));
-        }
-
-        console.warn("Requesting public key for:", peerId);
-        return null;
-    }
-    
-    const key = await crypto.subtle.deriveKey(
-        {
-            name: "ECDH",
-            public: peerPublicKey,
-        },
-        keyPair.privateKey,
-        {
-            name: "AES-GCM",
-            length: 256,
-        },
-        false,
-        ["encrypt", "decrypt"]
-    );
-
-    sharedKeys[peerId] = key;
-    return key;
-}
-
-async function decryptMessage(sharedKey, ciphertext, iv) {
-  const decrypted = await crypto.subtle.decrypt(
-    {
-      name: "AES-GCM",
-      iv: base64ToArrayBuffer(iv),
-    },
-    sharedKey,
-    base64ToArrayBuffer(ciphertext)
-  );
-
-  return new TextDecoder().decode(decrypted);
-}
-
-async function encryptMessage(sharedKey, message) {
-  const encoder = new TextEncoder();
-  const iv = crypto.getRandomValues(new Uint8Array(12));
-
-  const ciphertext = await crypto.subtle.encrypt(
-    {
-      name: "AES-GCM",
-      iv: iv,
-    },
-    sharedKey,
-    encoder.encode(message)
-  );
-
-  return {
-    ciphertext: arrayBufferToBase64(ciphertext),
-    iv: arrayBufferToBase64(iv)
-  };
-}
-
-function arrayBufferToBase64(buffer) {
-  return btoa(String.fromCharCode(...new Uint8Array(buffer)));
-}
-
-function base64ToArrayBuffer(base64) {
-  const binary = atob(base64);
-  const bytes = new Uint8Array(binary.length);
-  for (let i = 0; i < binary.length; i++) {
-    bytes[i] = binary.charCodeAt(i);
-  }
-  return bytes.buffer;
-}
-
-OutButt.onclick = async function () {
-    const msg = document.getElementById("chatBox").value;
-    const sendTo = document.getElementById("sendTo").value;
-
-    let key = await getSharedKey(sendTo);
-
-    if (!key) {
-        console.warn("Key not ready, queueing message");
-
-        if (!pendingMessages[sendTo]) {
-            pendingMessages[sendTo] = [];
-        }
-
-        pendingMessages[sendTo].push(msg);
+    if (validationError) {
+        alert(validationError);
         return;
     }
 
-    const enc = await encryptMessage(key, msg);
-    
-    socket.send(JSON.stringify({
-        type: "chat",
-        from: usernameInp,
-        to: sendTo,
-        text: enc.ciphertext,
-        iv: enc.iv
-    }));
+    try {
+        const safeName =
+            Date.now() +
+            "_" +
+            usernameInp +
+            "_" +
+            file.name.replace(/[^a-zA-Z0-9._-]/g, "_");
+
+        const { error } = await supabase.storage
+            .from("securechat-files")
+            .upload(safeName, file, {
+                cacheControl: "3600",
+                upsert: false
+            });
+
+        if (error) {
+            throw error;
+        }
+
+        const { data: publicData } = supabase.storage
+            .from("securechat-files")
+            .getPublicUrl(safeName);
+
+        const publicURL = publicData.publicUrl;
+
+        console.log("Cloud upload success:", publicURL);
+        alert(`Uploaded to cloud storage: ${safeName}`);
+
+        if (validUser && socket && socket.readyState === WebSocket.OPEN) {
+            const sendTo = document.getElementById("sendTo").value;
+
+            socket.send(JSON.stringify({
+                type: "chat",
+                to: sendTo,
+                text: `Cloud File: ${safeName}\n${publicURL}`
+            }));
+        }
+
+    } catch (err) {
+        console.error("Upload error:", err);
+        alert("Upload failed: " + err.message);
+    }
 };
 
-async function flushQueue(user) {
-    if (!pendingMessages[user]) return;
+OutButt.onclick = function () {
+    const outInp = document.getElementById("chatBox").value;
+    const sendTo = document.getElementById("sendTo").value;
 
-    const key = await getSharedKey(user);
-    if (!key) return;
-
-    for (const msg of pendingMessages[user]) {
-
-        if (!msg || typeof msg !== "string") {
-            console.warn("Skipping invalid queued message:", msg);
-            continue;
-        }
-
-        const enc = await encryptMessage(key, msg);
-
-        if (!enc || !enc.ciphertext || !enc.iv) {
-            console.error("Encryption failed for queued message:", msg);
-            continue;
-        }
-
+    if (validUser && socket && socket.readyState === WebSocket.OPEN) {
         socket.send(JSON.stringify({
             type: "chat",
-            from: usernameInp,
-            to: user,
-            text: enc.ciphertext,
-            iv: enc.iv
+            to: sendTo,
+            text: outInp
         }));
-    }
 
-    delete pendingMessages[user];
-}
+        document.getElementById("chatBox").value = "";
+
+    } else {
+        console.log("Not connected to WebSocket!");
+    }
+};
 
 LogoutButt.onclick = function () {
     if (validUser && socket && socket.readyState === WebSocket.OPEN) {
-        document.getElementById("head2").textContent = 'Signing Out'
-        socket.close(1000, 'Normal closure');
+        document.getElementById("head2").textContent = "Signing Out";
+        socket.close(1000, "Normal closure");
         Login.style.display = "block";
         Chat.style.display = "none";
     }
-}
+};
 
-// FTP download button
-function createDownloadButton(fileName) {
+function createCloudDownloadButton(fileName, url) {
     const container = document.getElementById("fileButtons");
 
-    // Create the button
     const btn = document.createElement("button");
     btn.textContent = `Download ${fileName}`;
     btn.style.margin = "5px";
 
-    // When clicked, download the file
-    btn.onclick = async function () {
-        try {
-            const res = await fetch(`https://${ipInp}/download/${fileName}`, {
-                method: "GET",
-                headers: {
-                    "Authorization": `Sender ${TOKEN}`
-                }
-            });
-
-            if (!res.ok) throw new Error("Download failed");
-
-            const blob = await res.blob();
-            const url = window.URL.createObjectURL(blob);
-
-            const a = document.createElement("a");
-            a.href = url;
-            a.download = fileName;
-            a.click();
-
-            // Clean up
-            window.URL.revokeObjectURL(url);
-
-        } catch (err) {
-            console.error(err);
-            alert("Download failed: " + err.message);
-        }
+    btn.onclick = function () {
+        window.open(url, "_blank");
     };
 
     container.appendChild(btn);
 }
 
-//Shows logs of each user
 async function loadLogs() {
     const otherUser = document.getElementById("sendTo").value;
-    const fileName = `${usernameInp}_${otherUser}.txt`;
-    document.getElementById("logBox").textContent = "SecureTech Chat Client";
+
+    try {
+        const firstuser = usernameInp < otherUser ? usernameInp : otherUser;
+        const secuser = usernameInp < otherUser ? otherUser : usernameInp;
+
+        const res = await fetch(`https://${ipInp}:8443/logs/${firstuser}_${secuser}.txt`, {
+            method: "GET"
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) throw new Error(data.error);
+
+        document.getElementById("logBox").textContent = data.log;
+
+    } catch (err) {
+        console.error(err);
+        alert("No logs found or failed to load");
+    }
+}
+
+if (LoadLogsButt) {
+    LoadLogsButt.onclick = loadLogs;
 }
