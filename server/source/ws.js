@@ -130,7 +130,7 @@ function websocketcon(ws, req, wss) {
                 ws);
 
     // client message
-    ws.on("message", (raw) => {
+    ws.on("message", async (raw) => {
         // rate limiting check
         if (isRateLimited(ip)) {
             ws.close(1008, "Rate limit exceeded");
@@ -239,7 +239,7 @@ function websocketcon(ws, req, wss) {
             });
 
             // phase 2 logging messages
-            log_msg(username, to, text);
+            await log_msg(username, to, text);
             
             send_json(ws, { type: "chat_ack", 
                             to,
