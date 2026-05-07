@@ -11,7 +11,7 @@ const password_min = 8;
 const password_max = 128;
 
 // DB
-const prod = process.env.ENV_NODE === "production";
+const prod = process.env.NODE_ENV === "production";
 let pool = null;
     if (prod) {
         pool = mysql.createPool({ host: process.env.DB_HOST, 
