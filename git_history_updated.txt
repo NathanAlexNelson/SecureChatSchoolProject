@@ -1,0 +1,67 @@
+79818fc | Wed May 6 23:35:56 2026 | tylerhuynh4 | IV passthrough
+ddefa9e | Wed May 6 23:24:29 2026 | tylerhuynh4 | remove debug
+62dd70d | Wed May 6 23:20:19 2026 | tylerhuynh4 | honestly my fault
+3fdadc6 | Wed May 6 23:18:46 2026 | tylerhuynh4 | trying to debug
+e9294d0 | Wed May 6 23:15:38 2026 | tylerhuynh4 | no sleep
+5d839e9 | Wed May 6 23:09:57 2026 | tylerhuynh4 | msg and log storage encryption
+60b02ac | Wed May 6 20:36:43 2026 | tylerhuynh4 | moved DBs
+507b620 | Wed May 6 20:12:36 2026 | tylerhuynh4 | why do i keep doing this to myself
+1e46c5f | Wed May 6 20:06:39 2026 | tylerhuynh4 | found  it
+a1f5bb6 | Wed May 6 19:52:19 2026 | tylerhuynh4 | deployment issue w/ node modules
+03631ba | Wed May 6 19:39:26 2026 | tylerhuynh4 | syntax error
+e7cb3d9 | Wed May 6 19:34:27 2026 | tylerhuynh4 | deploying backend
+c08bfd6 | Wed May 6 01:14:36 2026 | tylerhuynh4 | bug fix on literal
+d5487da | Tue May 5 23:33:14 2026 | tylerhuynh4 | bug fixes and prep work for deployment
+9ea950e | Thu Apr 16 01:06:38 2026 | tylerhuynh4 | hotfix? anyways the ftp shouldn't bug now
+3238a45 | Sun Mar 22 23:46:49 2026 | AlyaanMir45 | Client executable
+d55abb7 | Sun Mar 22 23:21:43 2026 | tylerhuynh4 | hotfix for files.js
+78398e5 | Sun Mar 22 20:09:38 2026 | tylerhuynh4 | log reformatted (removed timestamp from fname)
+12fbb3b | Sun Mar 22 19:45:03 2026 | Nathan Nelson | Add files via upload
+a4e58f8 | Sun Mar 22 18:56:54 2026 | Nathan Nelson | Delete style.css
+ee9cb34 | Sun Mar 22 18:56:45 2026 | Nathan Nelson | Delete index.html
+6e47697 | Sun Mar 22 18:56:36 2026 | Nathan Nelson | Delete index.js
+1f82090 | Sun Mar 22 18:55:03 2026 | Nathan Nelson | Add files via upload
+72fc61c | Sun Mar 22 18:39:27 2026 | tylerhuynh4 | pathing issue fixed
+10eca30 | Sun Mar 22 17:09:35 2026 | Nathan Nelson | Add files via upload
+4c70e73 | Sat Mar 21 21:26:36 2026 | tylerhuynh4 | fixed directory issues, bug fixes again, and updated ignore
+fd902d1 | Sat Mar 21 20:16:06 2026 | tylerhuynh4 | forgot to include the certs folder for build lmfao
+c05e2f2 | Sat Mar 21 20:03:38 2026 | tylerhuynh4 | Merge branch 'server' of https://github.com/NathanAlexNelson/SecureChatSchoolProject into server
+52fe276 | Sat Mar 21 20:01:08 2026 | tylerhuynh4 | fixed file transfer path traversal and rebuilt server.exe
+5e3d704 | Sat Mar 21 02:37:54 2026 | Nathan Nelson | Add files via upload
+305af82 | Sat Mar 21 02:13:24 2026 | Nathan Nelson | Add files via upload
+d6ff1e8 | Fri Mar 20 21:52:45 2026 | AlyaanMir45 | Merge branch 'file-transfer' into server
+0cde300 | Fri Mar 20 21:50:57 2026 | AlyaanMir45 | Added a changelog.md file based on commit history
+f325571 | Fri Mar 20 20:19:08 2026 | tylerhuynh4 | server.exe completed
+736a018 | Fri Mar 20 18:03:21 2026 | tylerhuynh4 | online users check & function implemented
+608dfa0 | Fri Mar 20 16:25:00 2026 | tylerhuynh4 | bug fixes and security additions to ftp
+705376e | Fri Mar 20 13:17:46 2026 | tylerhuynh4 | git merge
+8f62bef | Fri Mar 20 12:27:46 2026 | tylerhuynh4 | log system completed
+627c15d | Fri Mar 20 12:26:46 2026 | tylerhuynh4 | log system completed
+cc49f39 | Fri Mar 20 02:34:32 2026 | AlyaanMir45 | Connected file transfer with UI and now when users send files it will be sent as a downloadble link
+ad7ca7e | Fri Mar 20 01:09:28 2026 | AlyaanMir45 | Merge branch 'server' into file-transfer
+e5598b1 | Fri Mar 20 01:09:02 2026 | AlyaanMir45 | On server: temp package-lock before syncing server
+baa9392 | Fri Mar 20 01:09:02 2026 | AlyaanMir45 | index on server: 205d738 client-side encryption added, server sees cipher instead of plaintext, error handling, and bug fix on ws.js
+fbb7c17 | Thu Mar 19 07:41:27 2026 | Nathan Nelson | Add files via upload
+4f89600 | Thu Mar 19 06:54:26 2026 | Nathan Nelson | Add files via upload
+36b0637 | Tue Mar 17 15:55:01 2026 | AlyaanMir45 | Add initial file transfer backend and update gitignore
+c11cb66 | Tue Mar 17 15:52:19 2026 | AlyaanMir45 | Add file transfer routes
+205d738 | Sun Mar 15 01:03:37 2026 | tylerhuynh4 | client-side encryption added, server sees cipher instead of plaintext, error handling, and bug fix on ws.js
+9a73efa | Thu Mar 12 19:24:40 2026 | tylerhuynh4 | brute force handling
+f86f20f | Thu Mar 12 04:32:29 2026 | tylerhuynh4 | user account system (registering & kicks hardcoding)
+235a079 | Fri Feb 13 09:20:34 2026 | Nathan Nelson | Removed hardcoded username and password
+22feea2 | Fri Feb 13 02:38:24 2026 | tylerhuynh4 | finished prototype
+f1ecb77 | Thu Feb 12 21:36:05 2026 | tylerhuynh4 | Add files via upload
+50e97c5 | Thu Feb 12 19:55:05 2026 | Nathan Nelson | updated the web socket call
+6fe1191 | Wed Feb 11 20:52:46 2026 | Nathan Nelson | adjusted the index file to have output on HTML
+b25d0ef | Wed Feb 11 20:24:37 2026 | Nathan Nelson | Frontend with websocket calls
+0de7552 | Wed Feb 11 02:13:48 2026 | tylerhuynh4 | i'm so sorry godfather franklin it wont happen again
+2d016e3 | Wed Feb 11 02:06:23 2026 | tylerhuynh4 | oopsies 2
+6f33805 | Wed Feb 11 01:51:20 2026 | tylerhuynh4 | oopsies
+dd9bd70 | Wed Feb 11 01:49:51 2026 | tylerhuynh4 | oopsies
+59b53a6 | Tue Feb 10 15:38:23 2026 | Nathan Nelson | Add files via upload
+4c32d5e | Tue Feb 10 12:31:19 2026 | Nathan Nelson | Merge pull request #2 from NathanAlexNelson/server
+cb7b8f0 | Tue Feb 10 00:22:12 2026 | tylerhuynh4 | added real-time messaging, reconnection ability, logging, and handling, good for integration
+e1d2e67 | Tue Feb 10 00:04:54 2026 | Nathan Nelson | Add files via upload
+f7b2d17 | Mon Feb 9 14:49:42 2026 | AlyaanMir45 | Add WebSocket heartbeat and per-IP rate limiting
+c823f33 | Sun Feb 8 22:03:55 2026 | tylerhuynh4 | basic auth, token system for sessions, bcrypt for hash, verify users
+95eecfa | Sun Feb 8 03:18:52 2026 | tylerhuynh4 | server skeleton, TLS enabled, ws established, and can connect from client + server branch created

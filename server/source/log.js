@@ -18,7 +18,7 @@ if (prod) {
 }
 
 // fallback for local
-const base = path.dirname(process.execPath);
+const base = path.join(__dirname, "..");
 const logdir = path.join(base, "logs");
 
 if (!prod && !fs.existsSync(logdir)) {
