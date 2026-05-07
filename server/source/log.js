@@ -49,11 +49,11 @@ async function log_msg(from, to, text) {
         if (!session_starts.has(key)) {
             session_starts.set(key, ts);
         }
-        const sesh_start = session_starts.get(key);
+        const session_start = session_starts.get(key);
 
         try {
-            await pool.execute("INSERT INTO logs (sender, receiver, text, ts, sesh_start) VALUES (?, ?, ?, ?, ?)",
-                               [from, to, text, ts, sesh_start]);
+            await pool.execute("INSERT INTO logs (sender, receiver, text, ts, session_start) VALUES (?, ?, ?, ?, ?)",
+                               [from, to, text, ts, session_start]);
         } catch (err) {
             console.error("log_msg DB error:", err.message);
         }
