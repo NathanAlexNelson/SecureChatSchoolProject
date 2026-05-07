@@ -55,6 +55,28 @@ async function Http(req, res) {
         return res.end(JSON.stringify({ users: list_online() }));
     }
 
+    // get chat log btwn users
+    if (req.method === "GET" && req.url.startsWith("/logs")) {
+        const params = new URL(req.url, `https://${req.headers.host}`).searchParams;
+        const user1 = params.get("user1");
+        const user2 = params.get("user2");
+
+        if (!user1 || !user2) {
+            res.writeHead(400, { "Content-Type": "application/json" });
+            return res.end(JSON.stringify({ error: "user1 and user2 required" }));
+        }
+
+        try {
+            const { get_logs } = require("./log");
+            const logs = await get_logs(user1, user2);
+            res.writeHead(200, { "Content-Type": "application/json" });
+            return res.end(JSON.stringify({ logs }));
+        } catch (err) {
+            res.writeHead(500, { "Content-Type": "application/json" });
+            return res.end(JSON.stringify({ error: err.message }));
+        }
+    }
+
     // error handling
     res.writeHead(404, { "Content-Type": "application/json" }); //basic
     res.end(JSON.stringify({ error: "not found" }));
