@@ -20,8 +20,7 @@ let pool = null;
                                   database: process.env.DB_NAME,
                                   waitForConnections: true,
                                   connectionLimit: 5,
-                                  queueLimit: 0,
-                                  ssl: { rejectUnauthorized: false } });
+                                  queueLimit: 0, });
     }
 
 // FALLBACK for local
