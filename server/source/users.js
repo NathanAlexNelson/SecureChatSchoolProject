@@ -108,9 +108,9 @@ async function reg_user(username, password) {
 }
 
 // returns ONLY username as array 
-function list_users() {
+async function list_users() {
     if (prod) {
-        const [rows] = await pool.execute("SELECCT username FROM users");
+        const [rows] = await pool.execute("SELECT username FROM users");
         return rows.map(r => r.username);
     } else {
         const data = load_user();
