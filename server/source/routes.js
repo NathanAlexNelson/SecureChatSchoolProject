@@ -4,7 +4,7 @@ const { handleUpload, handleDownload } = require("./files");
 const { list_online } = require("./ws");
 
 // Basic CORS, just testing
-function Http(req, res) {
+async function Http(req, res) {
     res.setHeader("Access-Control-Allow-Origin", "*"); //anybody
     res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
     res.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS"); //so far
@@ -33,7 +33,7 @@ function Http(req, res) {
 
     // list (registered only)
     if (req.method === "GET" && req.url === "/users") {
-        const users = list_users();
+        const users = await list_users();
         res.writeHead(200, { "Content-Type": "application/json" });
         return res.end(JSON.stringify({ users }));
     }
