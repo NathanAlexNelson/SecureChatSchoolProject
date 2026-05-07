@@ -101,4 +101,14 @@ function close_log(username) {
     }
 }
 
-module.exports = { log_msg, close_log };
+async function get_logs(user1, user2) {
+    if (prod) {
+        const [rows] = await pool.execute("SELECT * FROM logs WHERE (sender = ? AND receiver = ?) OR (sender = ? AND receiver = ?) ORDER BY ts ASC",
+                                          [user1, user2, user2, user1]);
+        return rows;
+    } else {
+        return [];
+    }
+}
+
+module.exports = { log_msg, close_log, get_logs };
