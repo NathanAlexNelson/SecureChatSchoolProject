@@ -41,7 +41,6 @@ function ts_entry() {
 
 // api implementation
 async function log_msg(from, to, text) {
-    console.log("log_msg called, prod:", prod); // debug
     const key = key_pair(from, to);
     const ts = Date.now();
     // get/create session start time for pair
