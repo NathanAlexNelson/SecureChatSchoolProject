@@ -231,10 +231,12 @@ function websocketcon(ws, req, wss) {
                 });
                 return;
             }
-
+            
+            const iv = String(message.iv || "");
             send_json(to_socket, { type: "chat", 
                                    from: username,
                                    text,
+                                   iv,
                                    ts: Date.now()
             });
 
