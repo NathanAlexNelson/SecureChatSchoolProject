@@ -39,7 +39,7 @@
         <Label>Message Log:</Label>
         <textarea id="logBox" rows="15" cols="60" readonly></textarea>
         <br>
-        <button onclick="loadLogs()">Load Chat History</button>
+        <button onclick="loadLogs()" class="butts">Load Chat History</button>
         <br>
         <label>Online Users:</label>
         <select id="sendTo"></select>
@@ -62,7 +62,10 @@
 
         <br>
         <label>Offline Users:</label>
+        <br>
         <textarea id="offlineUsers" rows="15" cols="60" readonly></textarea>
+        <br>
+        <button id="showOfflineBtn" class="butts">Show Offline Users</button>
 
         <script src="index.js"></script>
     </div>

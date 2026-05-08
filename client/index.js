@@ -69,6 +69,7 @@ function updateUserDropdown(users) {
         option.textContent = user;
         select.appendChild(option);
     });
+    updateOfflineUsers();
 }
 
 function updateOfflineUsers() {
@@ -80,6 +81,11 @@ function updateOfflineUsers() {
 
     box.value = offlineUsers.map(u => `${u} (offline)`).join("\n");
 }
+
+document.getElementById("showOfflineBtn").onclick = async function () {
+    await fetchAllUsers();
+    updateOfflineUsers();
+};
 
 async function fetchAllUsers() {
     try {
@@ -171,7 +177,7 @@ LogButt.onclick = async function(){
             }));
 
             await fetchAllUsers();
-            updateOfflineUsers()
+            setTimeout(updateOfflineUsers, 200);
 
             document.getElementById("head2").textContent = `Connected as ${usernameInp}`;
             
