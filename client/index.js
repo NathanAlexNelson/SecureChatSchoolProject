@@ -1,3 +1,5 @@
+import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
+
 document.getElementById("head1").textContent = "SecureTech Chat Client";
 document.getElementById("para1").textContent = "CPSC 455 - Michael Franklin";
 document.getElementById("para2").textContent = "By: Alyaan Mir - Nathan Nelson - Tyler Huynh";
@@ -17,7 +19,11 @@ let TOKEN;
 
 let ipInp = `securechatschoolproject.onrender.com`;
 
-//Keys for E2E encryption shared is an array to allow multiple keys be shared
+const supabaseUrl = "https://lvakoxjxljptsbwdwjly.supabase.co";
+const supabaseKey = "sb_publishable_3VSIHvfenIlg1dWugzdMFw_E4Li81YG";
+const supabase = createClient(supabaseUrl, supabaseKey);
+
+// Keys for E2E encryption shared is an array to allow multiple keys be shared
 let keyPair;
 let sharedKeys = {};
 
@@ -32,11 +38,54 @@ const Chat = document.getElementById("Chat");
 
 const peerPublicKeys = {};
 
-//typing indicator
+// Typing indicator
 const chatBox = document.getElementById("chatBox");
 const sendToBox = document.getElementById("sendTo");
 
 let typingTimeout;
+
+// File Scanning, Low-Level front end
+const dangerousExtensions = [
+    ".exe",
+    ".bat",
+    ".cmd",
+    ".scr",
+    ".ps1",
+    ".js",
+    ".vbs",
+    ".jar",
+    ".msi"
+];
+
+function isDangerousFile(filename) {
+    const lower = filename.toLowerCase();
+
+    return dangerousExtensions.some(ext =>
+        lower.endsWith(ext)
+    );
+}
+
+function validateFileBeforeUpload(file) {
+    const maxSize = 25 * 1024 * 1024;
+
+    if (file.size > maxSize) {
+        return "File exceeds 25MB limit";
+    }
+
+    if (isDangerousFile(file.name)) {
+        return "Blocked dangerous file type";
+    }
+
+    if (
+        file.name.includes("/") ||
+        file.name.includes("\\") ||
+        file.name.includes("..")
+    ) {
+        return "Invalid filename";
+    }
+
+    return null;
+}
 
 // Add a user to the list and update dropdown
 function addUserToDropdown(user) {
@@ -88,6 +137,7 @@ document.getElementById("showOfflineBtn").onclick = async function () {
 };
 
 async function fetchAllUsers() {
+    console.log("test");
     try {
         const res = await fetch(`https://${ipInp}/users`, {
             headers: {
@@ -189,6 +239,7 @@ LogButt.onclick = async function(){
             const data = JSON.parse(event.data);
 
             console.log("Received from server:", data);
+
             if (data.type === "pubk_response") {
                 peerPublicKeys[data.username] = await importPublicKey(data.pubk);
 
@@ -198,8 +249,9 @@ LogButt.onclick = async function(){
 
                 flushQueue(data.username);
 
-                document.getElementById("head2").textContent = "Public Key Acquired!"
+                document.getElementById("head2").textContent = "Public Key Acquired!";
             }
+
             if (data.type === "typing") {
                 const indicator = document.getElementById("typingIndicator");
 
@@ -208,34 +260,6 @@ LogButt.onclick = async function(){
                 } else {
                     indicator.textContent = `${data.from} is typing...`;
                 }
-            }
-
-            if (data.type === "file") {
-
-                const key = await getSharedKey(data.from);
-                if (!key) return;
-
-                if (!data.text || !data.iv || !data.filename) {
-                    console.warn("Invalid file payload:", data);
-                    return;
-                }
-
-                if (!isBase64(data.text) || !isBase64(data.iv)) {
-                    console.error("Corrupted file encryption payload:", data);
-                    return;
-                }
-
-                const fileBuffer = await decryptFile(key, data.text, data.iv);
-
-                const blob = new Blob([fileBuffer], { type: data.mimeType });
-                const url = URL.createObjectURL(blob);
-
-                const a = document.createElement("a");
-                a.href = url;
-                a.download = data.filename;
-                a.click();
-
-                URL.revokeObjectURL(url);
             }
             
             if (data.type === "chat") {
@@ -269,8 +293,13 @@ LogButt.onclick = async function(){
 
                         saveLocalLog(data.from, usernameInp, decrypted);
                         loadLogs();
-                        document.getElementById("head2").textContent =
-                            `${data.from}: ${decrypted}`;
+
+                        if (decrypted.startsWith("Cloud File:")) {
+                            handleCloudFileMessage(data.from, decrypted);
+                        } else {
+                            document.getElementById("head2").textContent =
+                                `${data.from}: ${decrypted}`;
+                        }
                     }, 300);
 
                     return;
@@ -284,16 +313,19 @@ LogButt.onclick = async function(){
 
                 saveLocalLog(data.from, usernameInp, decrypted);
                 loadLogs();
-                document.getElementById("head2").textContent =
-                    `${data.from}: ${decrypted}`;
+
+                if (decrypted.startsWith("Cloud File:")) {
+                    handleCloudFileMessage(data.from, decrypted);
+                } else {
+                    document.getElementById("head2").textContent =
+                        `${data.from}: ${decrypted}`;
+                }
             }
 
             if (data.type === "system" && data.event === "connected") {
-                if (data.type === "system" && data.event === "connected") {
-                    users = data.online || [];   // 🔥 FULL SYNC
-                    updateUserDropdown(users);
-                    updateOfflineUsers();
-                }
+                users = data.online || [];   // FULL SYNC
+                updateUserDropdown(users);
+                updateOfflineUsers();
             }
 
             if (data.type === "system" && data.event === "join") {
@@ -318,7 +350,7 @@ LogButt.onclick = async function(){
         alert(err.message);
         document.getElementById("head2").textContent = "Login Failed";
     }
-}
+};
 
 async function encryptFile(sharedKey, file) {
     const iv = crypto.getRandomValues(new Uint8Array(12));
@@ -337,7 +369,7 @@ async function encryptFile(sharedKey, file) {
         ciphertext: arrayBufferToBase64(ciphertext),
         iv: arrayBufferToBase64(iv),
         filename: file.name,
-        mimeType: file.type
+        mimeType: file.type || "application/octet-stream"
     };
 }
 
@@ -382,7 +414,7 @@ RegButt.onclick = async function(){
         alert(err.message);
         document.getElementById("head2").textContent = 'Registration Failed';
     }
-}
+};
 
 // Function to validate alphanumeric input does not check username that is done at server launch in backend
 function validateFunc(inputCheck) {
@@ -399,8 +431,7 @@ function validateFunc(inputCheck) {
     }
 }
 
-// Validates numbers and dots for IP
-
+// Cloud FTP button - uploads encrypted file to Supabase and sends URL as encrypted chat
 FTPButt.onclick = async function () {
     const fileInput = document.getElementById("fileInput");
     const file = fileInput.files[0];
@@ -412,34 +443,122 @@ FTPButt.onclick = async function () {
 
     const sendTo = document.getElementById("sendTo").value;
 
-    try {
+    if (!sendTo) {
+        alert("Please select a recipient");
+        return;
+    }
 
+    const validationError = validateFileBeforeUpload(file);
+
+    if (validationError) {
+        alert(validationError);
+        return;
+    }
+
+    try {
         const key = await getSharedKey(sendTo);
 
         if (!key) {
-            console.warn("File key not ready yet");
+            alert("Encryption key not ready yet. Send a normal message first.");
             return;
         }
 
         const enc = await encryptFile(key, file);
 
-        socket.send(JSON.stringify({
-            type: "file",
-            from: usernameInp,
-            to: sendTo,
+        const encryptedPackage = {
             filename: enc.filename,
             mimeType: enc.mimeType,
-            text: enc.ciphertext,
+            ciphertext: enc.ciphertext,
             iv: enc.iv
+        };
+
+        const safeName =
+            Date.now() +
+            "_" +
+            usernameInp +
+            "_" +
+            file.name.replace(/[^a-zA-Z0-9._-]/g, "_") +
+            ".securechat.txt";
+
+        const encryptedBlob = new Blob(
+            [JSON.stringify(encryptedPackage)],
+            { type: "text/plain" }
+        );
+
+        const { error } = await supabase.storage
+            .from("securechat-files")
+            .upload(safeName, encryptedBlob, {
+                cacheControl: "3600",
+                upsert: false,
+                contentType: "text/plain"
+            });
+
+        if (error) {
+            throw error;
+        }
+
+        const { data: publicData } = supabase.storage
+            .from("securechat-files")
+            .getPublicUrl(safeName);
+
+        const publicURL = publicData.publicUrl;
+
+        const cloudMessage = `Cloud File: ${file.name}\n${publicURL}`;
+
+        const msgEnc = await encryptMessage(key, cloudMessage);
+
+        socket.send(JSON.stringify({
+            type: "chat",
+            from: usernameInp,
+            to: sendTo,
+            text: msgEnc.ciphertext,
+            iv: msgEnc.iv
         }));
 
-        alert(`Encrypted file sent: ${file.name}`);
+        saveLocalLog(usernameInp, sendTo, cloudMessage);
+        loadLogs();
+
+        alert(`Encrypted cloud file sent: ${file.name}`);
 
     } catch (err) {
         console.error("Upload error:", err);
-        alert(err.message);
+        alert("Upload failed: " + err.message);
     }
 };
+
+//santize message before sending
+function sanitizeMessage(input) {
+
+    if (typeof input !== "string") {
+        return "";
+    }
+
+    // Normalize Unicode
+    let sanitized = input.normalize("NFKC");
+
+    // Remove null bytes + dangerous control chars
+    sanitized = sanitized.replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, "");
+
+    // Trim whitespace
+    sanitized = sanitized.trim();
+
+    // Limit message size
+    const MAX_LENGTH = 4000;
+
+    if (sanitized.length > MAX_LENGTH) {
+        sanitized = sanitized.slice(0, MAX_LENGTH);
+    }
+
+    // Escape HTML special chars
+    sanitized = sanitized
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#39;");
+
+    return sanitized;
+}
 
 //E2E encyrption using ECDH
 function generateKeyPair() {
@@ -487,13 +606,30 @@ async function importPublicKey(base64Key) {
 }
 
 async function getSharedKey(peerId) {
-    if (sharedKeys[peerId]) return sharedKeys[peerId];
+
+    if (!peerId || typeof peerId !== "string") {
+        console.error("Invalid peerId:", peerId);
+        return null;
+    }
+
+    if (sharedKeys[peerId]) {
+        return sharedKeys[peerId];
+    }
 
     const peerPublicKey = peerPublicKeys[peerId];
 
     if (!peerPublicKey) {
+
+        if (!socket || socket.readyState !== WebSocket.OPEN) {
+            console.error("Socket not connected");
+            return null;
+        }
+
         if (!pendingKeyRequests.has(peerId)) {
+
             pendingKeyRequests.add(peerId);
+
+            console.log("Requesting public key for:", peerId);
 
             socket.send(JSON.stringify({
                 type: "pubk_request",
@@ -501,10 +637,9 @@ async function getSharedKey(peerId) {
             }));
         }
 
-        console.warn("Requesting public key for:", peerId);
         return null;
     }
-    
+
     const key = await crypto.subtle.deriveKey(
         {
             name: "ECDH",
@@ -520,6 +655,7 @@ async function getSharedKey(peerId) {
     );
 
     sharedKeys[peerId] = key;
+
     return key;
 }
 
@@ -569,9 +705,19 @@ function base64ToArrayBuffer(base64) {
 }
 
 OutButt.onclick = async function () {
-    const msg = document.getElementById("chatBox").value;
     const sendTo = document.getElementById("sendTo").value;
+    const rawMsg = document.getElementById("chatBox").value;
+    const msg = sanitizeMessage(rawMsg);
 
+    if (!msg) {
+        alert("Invalid or empty message");
+        return;
+    }
+	
+    if (!sendTo) {
+    	alert("Please select a user");
+    	return;
+	}
     document.getElementById("chatBox").value = "";
 
     let key = await getSharedKey(sendTo);
@@ -599,6 +745,7 @@ OutButt.onclick = async function () {
     
     saveLocalLog(usernameInp, sendTo, msg);
     loadLogs();
+
     //clears typing status
     socket.send(JSON.stringify({
         type: "typing",
@@ -637,7 +784,8 @@ async function flushQueue(user) {
             text: enc.ciphertext,
             iv: enc.iv
         }));
-        saveLocalLog(usernameInp, sendTo, msg);
+
+        saveLocalLog(usernameInp, user, msg);
         loadLogs();
     }
 
@@ -646,48 +794,77 @@ async function flushQueue(user) {
 
 LogoutButt.onclick = function () {
     if (validUser && socket && socket.readyState === WebSocket.OPEN) {
-        document.getElementById("head2").textContent = 'Signing Out'
+        document.getElementById("head2").textContent = 'Signing Out';
         socket.close(1000, 'Normal closure');
         Login.style.display = "block";
         Chat.style.display = "none";
     }
+};
+
+function handleCloudFileMessage(from, decrypted) {
+    const lines = decrypted.split("\n");
+    const label = lines[0];
+    const url = lines[1];
+
+    const fileName = label.replace("Cloud File: ", "");
+
+    document.getElementById("head2").textContent =
+        `${from} sent a cloud file: ${fileName}`;
+
+    createCloudDownloadButton(fileName, url, from);
 }
 
-// FTP download button
-function createDownloadButton(fileName) {
+function createCloudDownloadButton(fileName, url, fromUser) {
     const container = document.getElementById("fileButtons");
 
-    // Create the button
     const btn = document.createElement("button");
     btn.textContent = `Download ${fileName}`;
     btn.style.margin = "5px";
 
-    // When clicked, download the file
     btn.onclick = async function () {
         try {
-            const res = await fetch(`https://${ipInp}/download/${fileName}`, {
-                method: "GET",
-                headers: {
-                    "Authorization": `Sender ${TOKEN}`
+            const key = await getSharedKey(fromUser);
+
+            if (!key) {
+                alert("Encryption key not ready");
+                return;
+            }
+
+            const res = await fetch(url);
+
+            if (!res.ok) {
+                throw new Error("Failed to download cloud file");
+            }
+
+            const encryptedPackage = await res.json();
+
+            const decryptedBuffer = await decryptFile(
+                key,
+                encryptedPackage.ciphertext,
+                encryptedPackage.iv
+            );
+
+            const blob = new Blob(
+                [decryptedBuffer],
+                {
+                    type:
+                        encryptedPackage.mimeType ||
+                        "application/octet-stream"
                 }
-            });
+            );
 
-            if (!res.ok) throw new Error("Download failed");
-
-            const blob = await res.blob();
-            const url = window.URL.createObjectURL(blob);
+            const downloadUrl = URL.createObjectURL(blob);
 
             const a = document.createElement("a");
-            a.href = url;
-            a.download = fileName;
+            a.href = downloadUrl;
+            a.download = encryptedPackage.filename || fileName;
             a.click();
 
-            // Clean up
-            window.URL.revokeObjectURL(url);
+            URL.revokeObjectURL(downloadUrl);
 
         } catch (err) {
             console.error(err);
-            alert("Download failed: " + err.message);
+            alert("Cloud download failed: " + err.message);
         }
     };
 
@@ -718,8 +895,17 @@ function saveLocalLog(sender, receiver, text) {
 }
 
 async function loadLogs() {
-
     const otherUser = document.getElementById("sendTo").value;
+    if (!usernameInp) return;
+    if (!otherUser) return;
+
+    console.log("usernameInp:", usernameInp);
+    console.log("otherUser:", otherUser);
+
+    if (!otherUser) {
+        console.error("No recipient selected");
+        return;
+    }
 
     const convoKey = getConversationKey(usernameInp, otherUser);
 
@@ -737,3 +923,5 @@ async function loadLogs() {
 
     document.getElementById("logBox").value = output;
 }
+
+window.loadLogs = loadLogs;
