@@ -4,75 +4,67 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SecureTech Chat Client</title>
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet", href="style.css">
 </head>
 <body>
+    
 
+    <!--Login Boxes-->
     <div id="Login">
         <h1 id="head1"></h1>
         <p id="para1"></p>
         <label id="para2"></label>
-
-        <br><br>
-
+        <br>
+        <br>
         <label>Username:</label>
-        <input id="usernameBox">
+        <input id="usernameBox"></input>
 
         <br>
-
         <label>Password:</label>
-        <input id="passwordBox" type="password">
+        <input id="passwordBox" type="password"></input>
 
         <br>
-
-        <label>Server IP:</label>
-        <input id="ipInp">
-
+        
+        <!--BUTTONS!-->        
         <div id="buttons">
             <button id="LogButt" class="butts">Login</button>
             <button id="RegButt" class="butts">Register</button>
         </div>
     </div>
 
+
+
+    <!--Chat Boxes-->    
     <div id="Chat" style="display: none;">
-        <label>Message Log:</label>
-        <br>
+        <Label>Message Log:</Label>
         <textarea id="logBox" rows="15" cols="60" readonly></textarea>
-
         <br>
-
-        <button id="LoadLogsButt">Load Chat History</button>
-
-        <br><br>
-
+        <button onclick="loadLogs()">Load Chat History</button>
+        <br>
         <label>Online Users:</label>
         <select id="sendTo"></select>
-
+        
         <br>
-
-        <label>Message:</label>
-        <input id="chatBox" size="50">
-
-        <br><br>
-
-        <label>Send File:</label>
-        <input type="file" id="fileInput">
-
+        <label>Output:</label>
+        <input id="chatBox" size = "50"></input>
+        <br>
+        <input type="file" id="fileInput"/>
         <div id="buttons2">
-            <button id="OutButt" class="butts">Send Message</button>
+            <button id="OutButt" class="butts">Send</button>
             <button id="FTPButt" class="butts">Send File</button>
             <button id="LogoutButt" class="butts">Logout</button>
         </div>
-
+        <div id="typingIndicator" style="font-style: italic; opacity: 0.6;"></div>
         <br>
-
         <div id="fileButtons"></div>
+        <br>
+        <h2 id="head2"></h2>
 
         <br>
+        <label>Offline Users:</label>
+        <textarea id="offlineUsers" rows="15" cols="60" readonly></textarea>
 
-        <h2 id="head2"></h2>
+        <script src="index.js"></script>
     </div>
-
-    <script type="module" src="index.js"></script>
 </body>
 </html>
