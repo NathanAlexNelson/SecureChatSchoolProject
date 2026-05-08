@@ -261,6 +261,19 @@ function websocketcon(ws, req, wss) {
                                    ts: Date.now() });
             return;
         }
+
+        // return all reg users including offline
+        if (message.type === "get_users") {
+            const { list_users } = require("./users");
+            const all_users = await list_users();
+            const online = list_online();
+
+            send_json(ws, { type: "users_list", 
+                            all: all_users,
+                            online: online,
+                            ts: Date.now() });
+            return;
+        }
         
         // error handling (error handled the error handle)
         send_json(ws, { type: "error",
