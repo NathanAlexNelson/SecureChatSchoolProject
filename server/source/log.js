@@ -41,6 +41,15 @@ function ts_entry() {
 
 // api implementation
 async function log_msg(from, to, text) {
+    // sanitization
+    if (Buffer.isBuffer(text)) {
+        text = text.toString("base64");
+    } else if (text instanceof Uint8Array) {
+        text = text.from(text).toString("base64");
+    } else {
+        text = String(text ?? "");
+    }
+
     const key = key_pair(from, to);
     const ts = Date.now();
     // get/create session start time for pair
